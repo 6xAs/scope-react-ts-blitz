@@ -9,12 +9,13 @@ import { Tasks } from './pages/Tasks'
 export default function App() {
   return (
     <Routes>
+      <Route path="/kanban/:kind/:id" element={<Kanban />} />
+
       <Route element={<AppShell />}>
         <Route path="/" element={<Home />} />
         <Route path="/atribuicoes" element={<Assignments />} />
         <Route path="/tarefas" element={<Tasks />} />
         <Route path="/projetos" element={<Projects />} />
-        <Route path="/kanban/:kind/:id" element={<Kanban />} />
         <Route
           path="/relatorios"
           element={
