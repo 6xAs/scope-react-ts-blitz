@@ -36,7 +36,7 @@ export function Home() {
     <div>
       <div className="home-hero">
         <div>
-          <p>Olá, Anderson 👋</p>
+          <p>Olá, Anderson Seixas 👋</p>
           <h1>Aqui é onde os projetos ganham vida.</h1>
           <span>
             Acompanhe o essencial e avance para os detalhes apenas quando precisar.
