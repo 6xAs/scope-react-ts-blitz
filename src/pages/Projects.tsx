@@ -1,17 +1,1 @@
-import { ArrowRight } from 'lucide-react'
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { PageTabs } from '../components/PageTabs'
-import { projects } from '../data/mock'
-
-const tabs = ['Últimas Movimentações','Meus Projetos','Em Andamento','Planejamento','Concluídos']
-
-export function Projects(){
-  const [active,setActive]=useState(tabs[0])
-  const visible = active==='Em Andamento' ? projects.filter(p=>p.status==='Em andamento') : active==='Planejamento' ? projects.filter(p=>p.status==='Planejamento') : projects
-  return <div className="page-stack">
-    <div className="page-heading"><div><h1>Projetos</h1><p>Veja as movimentações mais recentes e acesse o Kanban de cada projeto.</p></div></div>
-    <PageTabs items={tabs} active={active} onChange={setActive}/>
-    <div className="project-grid">{visible.slice(0,4).map(p=><Link className="project-card" key={p.id} to={`/kanban/projeto/${p.id}`}><img src={p.image} alt=""/><div className="project-card-body"><small>{p.status}</small><strong>{p.title}</strong><span>{p.event}</span><div><time>{p.when}</time><ArrowRight size={17}/></div></div></Link>)}</div>
-  </div>
-}
+import{ExternalLink,MoreVertical,Plus}from'lucide-react';import{useState}from'react';import{useNavigate}from'react-router-dom';import{PageTabs}from'../components/PageTabs';import{projects}from'../data/mock';import{StatusPill}from'../components/StatusPill';const tabs=['Últimas Movimentações','Minha Equipe','Em Andamento','Planejamento','Concluídos','Em Risco','Cancelados'];export function Projects(){const[active,setActive]=useState(tabs[0]);const navigate=useNavigate();const list=active===tabs[0]?projects.slice(0,4):projects;return <div><div className="title-row"><div><h1>Projetos</h1><p>Acompanhe projetos institucionais com leitura rápida e foco no próximo passo.</p></div><button className="primary"><Plus size={17}/>Novo Projeto</button></div><PageTabs tabs={tabs} active={active} onChange={setActive}/><div className="cards-grid project-grid">{list.map(p=><article className="project-card" key={p.id}><button className="more"><MoreVertical size={18}/></button><div className="project-main"><img src={p.image} alt=""/><div><h3>{p.title}</h3><p>{p.subtitle}</p><StatusPill>{p.status}</StatusPill></div></div><div className="progress-line"><div className="progress"><span style={{width:`${p.progress}%`}}/></div><strong>{p.progress}%</strong></div><small className="updated">Atualizado {p.updated}</small><div className="card-actions"><button className="primary small" onClick={()=>navigate(`/kanban/projeto/${p.id}`)}>Kanban</button>{p.hasExternal&&<a className="soft-button" href="https://www.rondonia.ro.gov.br/" target="_blank" rel="noreferrer"><ExternalLink size={15}/>Link externo</a>}</div></article>)}</div></div>}

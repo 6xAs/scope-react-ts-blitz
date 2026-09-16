@@ -1,17 +1,1 @@
-import { ArrowRight } from 'lucide-react'
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { PageTabs } from '../components/PageTabs'
-import { tasks } from '../data/mock'
-
-const tabs = ['Últimas Movimentações','Minhas Tarefas','Em Andamento','Pendentes','Concluídas']
-
-export function Tasks(){
-  const [active,setActive]=useState(tabs[0])
-  const visible = active==='Em Andamento' ? tasks.filter(t=>t.status==='Em andamento') : active==='Pendentes' ? tasks.filter(t=>t.status==='Pendente') : tasks
-  return <div className="page-stack">
-    <div className="page-heading"><div><h1>Tarefas</h1><p>Visualize o que mudou e entre no Kanban quando precisar agir.</p></div></div>
-    <PageTabs items={tabs} active={active} onChange={setActive}/>
-    <div className="recent-grid">{visible.slice(0,4).map(t=><Link className="movement-card task-card" key={t.id} to={`/kanban/tarefa/${t.id}`}><span className="status-dot"/><div className="movement-body"><strong>{t.title}</strong><span>{t.event}</span><small>{t.when}</small></div><ArrowRight size={17}/></Link>)}</div>
-  </div>
-}
+import{Calendar,UserRound,MoreVertical,Plus}from'lucide-react';import{useState}from'react';import{useNavigate}from'react-router-dom';import{PageTabs}from'../components/PageTabs';import{StatusPill}from'../components/StatusPill';import{tasks}from'../data/mock';const tabs=['Últimas Movimentações','Minhas Tarefas','Em Andamento','Pendentes','Concluídas','Criadas por mim','Todas as Tarefas'];export function Tasks(){const[active,setActive]=useState(tabs[0]);const navigate=useNavigate();const list=active==='Últimas Movimentações'?tasks.slice(0,4):tasks;return <div><div className="title-row"><div><h1>Tarefas</h1><p>Gerencie suas atividades com foco no que importa.</p></div><button className="primary"><Plus size={17}/>Nova Tarefa</button></div><PageTabs tabs={tabs} active={active} onChange={setActive}/><div className="cards-grid task-grid">{list.map(t=><article className="task-card" key={t.id}><button className="more"><MoreVertical size={18}/></button><div className="task-card-top"><div className="task-icon">✓</div><div><h3>{t.title}</h3><p>{t.description}</p></div></div><div className="pill-row"><StatusPill>{t.status}</StatusPill><span className={`priority ${t.priority.toLowerCase()}`}>{t.priority} prioridade</span></div><div className="meta-row"><span><Calendar size={16}/>{t.date}</span><span><UserRound size={16}/>{t.owner}</span><button className="soft-button" onClick={()=>navigate(`/kanban/tarefa/${t.id}`)}>Abrir Kanban</button></div></article>)}</div></div>}
