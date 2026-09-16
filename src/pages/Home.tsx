@@ -1,9 +1,37 @@
+import { useEffect, useState } from 'react'
 import { ArrowRight, CheckSquare2, FolderKanban, Link2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { StatusPill } from '../components/StatusPill'
 import { assignments, projects, tasks } from '../data/mock'
 
+const heroFallback =
+  'linear-gradient(90deg, rgba(18, 73, 176, 0.92), rgba(26, 126, 255, 0.48))'
+
 export function Home() {
+  const [heroBackground, setHeroBackground] = useState(heroFallback)
+
+  useEffect(() => {
+    let active = true
+
+    fetch('/palacio-rio-madeira.webp')
+      .then((response) => response.text())
+      .then((base64Image) => {
+        if (!active) return
+
+        setHeroBackground(
+          `linear-gradient(90deg, rgba(18, 73, 176, 0.84), rgba(26, 126, 255, 0.34)), url("data:image/webp;base64,${base64Image.trim()}")`,
+        )
+      })
+      .catch(() => {
+        if (!active) return
+        setHeroBackground(heroFallback)
+      })
+
+    return () => {
+      active = false
+    }
+  }, [])
+
   return (
     <div>
       <div className="home-hero">
@@ -15,7 +43,10 @@ export function Home() {
           </span>
         </div>
 
-        <div className="hero-image">
+        <div
+          className="hero-image"
+          style={{ backgroundImage: heroBackground }}
+        >
           <div>Projetos conectam pessoas, decisões e resultados.</div>
         </div>
       </div>
