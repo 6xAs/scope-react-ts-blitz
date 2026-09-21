@@ -5,7 +5,6 @@ import {
   ChevronRight,
   Clock3,
   DoorOpen,
-  MapPin,
   MessageCircle,
   MoreHorizontal,
   Plus,
@@ -99,8 +98,6 @@ const calendarDays = [
   { day: 1, outside: true },
   { day: 2, outside: true },
   { day: 3, outside: true },
-  { day: 4, outside: true },
-  { day: 5, outside: true },
 ]
 
 const members = [

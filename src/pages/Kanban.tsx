@@ -20,6 +20,7 @@ import {
   Users,
 } from 'lucide-react'
 import { Link, useParams } from 'react-router-dom'
+import { FloatingWorkspaceTools } from '../components/FloatingWorkspaceTools'
 import { projects, tasks } from '../data/mock'
 import '../project-kanban.css'
 
@@ -376,6 +377,8 @@ export function Kanban() {
       <button className="kanban-ai-button" type="button" aria-label="Assistente do projeto">
         <Sparkles size={19} />
       </button>
+
+      <FloatingWorkspaceTools />
     </div>
   )
 }
