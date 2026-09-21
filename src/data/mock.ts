@@ -7,6 +7,7 @@ export type Project = {
   updated: string
   image: string
   hasExternal?: boolean
+  externalUrl?: string
 }
 
 export type Task = {
@@ -31,6 +32,19 @@ export type Assignment = {
 }
 
 export const projects: Project[] = [
+  {
+    id: 'pdtic-2024-2027',
+    title: 'PDTIC - Plano Diretor de Tecnologia da Informação e Comunicação',
+    subtitle: 'Planejamento Estratégico e Governança · 2024–2027',
+    status: 'Em andamento',
+    progress: 68,
+    updated: 'há 1 hora',
+    image:
+      'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=900&q=80',
+    hasExternal: true,
+    externalUrl:
+      'https://wiki.setic.ro.gov.br/pdfs/compliance/pdtic_2024-2027_rev1.3-1.pdf',
+  },
   {
     id: 'visao-computacional',
     title: 'Visão Computacional',

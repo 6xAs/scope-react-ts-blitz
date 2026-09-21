@@ -97,7 +97,10 @@ export function Projects() {
 
                   {project.hasExternal && (
                     <a
-                      href="https://www.rondonia.ro.gov.br/"
+                      href={
+                        project.externalUrl ??
+                        'https://www.rondonia.ro.gov.br/'
+                      }
                       target="_blank"
                       rel="noreferrer"
                       role="menuitem"
