@@ -9,6 +9,7 @@ import {
   Settings,
 } from 'lucide-react'
 import { NavLink, Outlet } from 'react-router-dom'
+import { FloatingWorkspaceTools } from './FloatingWorkspaceTools'
 
 const nav = [
   { to: '/', label: 'Home', icon: Home },
@@ -88,6 +89,8 @@ export function AppShell() {
         <section className="page-wrap">
           <Outlet />
         </section>
+
+        <FloatingWorkspaceTools />
       </main>
     </div>
   )

@@ -1,0 +1,1034 @@
+/* Floating collaboration tools */
+.workspace-fab-group {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.workspace-fab {
+  position: relative;
+  min-width: 112px;
+  height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 0 16px;
+  border: 1px solid #e1e5ef;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.96);
+  color: #243052;
+  box-shadow: 0 12px 32px rgba(28, 41, 84, 0.14);
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+}
+
+.workspace-fab:hover,
+.workspace-fab.active {
+  border-color: #7451f2;
+  background: #6336f4;
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.workspace-fab span {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.workspace-fab-badge {
+  position: absolute;
+  top: -5px;
+  right: -4px;
+  min-width: 19px;
+  height: 19px;
+  display: grid;
+  place-items: center;
+  padding: 0 5px;
+  border: 2px solid #f7f9fd;
+  border-radius: 999px;
+  background: #f04455;
+  color: #fff;
+  font-size: 9px;
+}
+
+.workspace-panel-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 69;
+  background: rgba(19, 28, 55, 0.12);
+  backdrop-filter: blur(1px);
+}
+
+.workspace-panel {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  bottom: 18px;
+  z-index: 70;
+  overflow: hidden;
+  border: 1px solid #e2e7f0;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 30px 90px rgba(20, 30, 67, 0.22);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(calc(100% + 40px));
+  transition: opacity 180ms ease, transform 220ms ease;
+}
+
+.workspace-panel.open {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(0);
+}
+
+.workspace-panel-agenda {
+  width: min(1180px, calc(100vw - 290px));
+  display: flex;
+  flex-direction: column;
+}
+
+.workspace-panel-chat {
+  width: min(820px, calc(100vw - 290px));
+  display: flex;
+  flex-direction: column;
+}
+
+.workspace-panel-header {
+  min-height: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 14px 18px 14px 22px;
+  border-bottom: 1px solid #ebeff5;
+}
+
+.workspace-panel-header > div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.workspace-panel-icon {
+  width: 39px;
+  height: 39px;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  background: #f0ecff;
+  color: #6336f4;
+}
+
+.workspace-panel-header h2 {
+  margin: 0 0 2px;
+  color: #17214a;
+  font-size: 19px;
+}
+
+.workspace-panel-header p {
+  margin: 0;
+  color: #7c87a7;
+  font-size: 12px;
+}
+
+.workspace-close {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 10px;
+  background: #f7f8fb;
+  color: #737f9d;
+  cursor: pointer;
+}
+
+.workspace-close:hover {
+  background: #f0edff;
+  color: #6336f4;
+}
+
+/* Agenda */
+.agenda-scope-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 13px 20px;
+  overflow-x: auto;
+  border-bottom: 1px solid #edf0f5;
+}
+
+.agenda-scope-tabs button {
+  white-space: nowrap;
+  padding: 8px 12px;
+  border: 1px solid #e5e8f0;
+  border-radius: 999px;
+  background: #fff;
+  color: #56617d;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.agenda-scope-tabs button:hover,
+.agenda-scope-tabs button.active {
+  border-color: #cfc4ff;
+  background: #f1edff;
+  color: #6034ef;
+}
+
+.agenda-toolbar {
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 10px 20px;
+  border-bottom: 1px solid #edf0f5;
+}
+
+.agenda-navigation {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.agenda-navigation button {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #e3e7ef;
+  border-radius: 8px;
+  background: #fff;
+  color: #53607d;
+  cursor: pointer;
+}
+
+.agenda-navigation .agenda-today {
+  width: auto;
+  padding: 0 12px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.agenda-navigation strong {
+  margin-left: 6px;
+  color: #253052;
+  font-size: 14px;
+}
+
+.agenda-room-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 13px;
+  border: 0;
+  border-radius: 9px;
+  background: #6336f4;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.agenda-layout {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 292px;
+  gap: 0;
+  flex: 1;
+  overflow: hidden;
+}
+
+.calendar-shell {
+  min-width: 0;
+  overflow: auto;
+  padding: 0 16px 18px 20px;
+  background: #fff;
+}
+
+.calendar-weekdays {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(108px, 1fr));
+  min-width: 756px;
+  background: #fff;
+}
+
+.calendar-weekdays span {
+  padding: 12px 8px 8px;
+  color: #8a94ac;
+  font-size: 10px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(108px, 1fr));
+  grid-auto-rows: minmax(116px, 1fr);
+  min-width: 756px;
+  border-top: 1px solid #e8ecf3;
+  border-left: 1px solid #e8ecf3;
+}
+
+.calendar-cell {
+  position: relative;
+  min-height: 116px;
+  padding: 8px;
+  border-right: 1px solid #e8ecf3;
+  border-bottom: 1px solid #e8ecf3;
+  background: #fff;
+}
+
+.calendar-cell.outside {
+  background: #fafbfc;
+}
+
+.calendar-cell.outside .calendar-day-number {
+  color: #c4cad6;
+}
+
+.calendar-day-number {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  margin-left: auto;
+  border-radius: 50%;
+  color: #59647e;
+  font-size: 11px;
+}
+
+.calendar-cell.today .calendar-day-number {
+  background: #6336f4;
+  color: #fff;
+  font-weight: 800;
+}
+
+.calendar-events {
+  display: grid;
+  gap: 5px;
+  margin-top: 5px;
+}
+
+.calendar-event {
+  min-width: 0;
+  padding: 5px 6px;
+  overflow: hidden;
+  border-left: 3px solid transparent;
+  border-radius: 5px;
+  font-size: 9px;
+  line-height: 1.25;
+}
+
+.calendar-event small {
+  display: block;
+  margin-bottom: 2px;
+  font-weight: 800;
+}
+
+.calendar-event span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.calendar-event-project {
+  border-left-color: #6336f4;
+  background: #f0ecff;
+  color: #5634cf;
+}
+
+.calendar-event-task {
+  border-left-color: #2b72e5;
+  background: #edf5ff;
+  color: #2964ba;
+}
+
+.calendar-event-meeting {
+  border-left-color: #15a46b;
+  background: #eaf8f2;
+  color: #187a56;
+}
+
+.calendar-event-institutional {
+  border-left-color: #d18a17;
+  background: #fff5df;
+  color: #94620e;
+}
+
+.agenda-side {
+  overflow-y: auto;
+  padding: 14px;
+  border-left: 1px solid #edf0f5;
+  background: #f8f9fc;
+}
+
+.agenda-side-card {
+  margin-bottom: 12px;
+  padding: 14px;
+  border: 1px solid #e6e9f1;
+  border-radius: 13px;
+  background: #fff;
+}
+
+.agenda-side-label {
+  display: block;
+  margin-bottom: 12px;
+  color: #8a94ad;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.agenda-next-card article {
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  gap: 10px;
+  padding: 11px 0;
+  border-bottom: 1px solid #edf0f5;
+}
+
+.agenda-next-card article:last-child {
+  border-bottom: 0;
+}
+
+.agenda-next-card article > div:last-child {
+  min-width: 0;
+}
+
+.agenda-next-card article strong {
+  display: block;
+  color: #2b3658;
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.agenda-next-card article small {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 5px;
+  color: #8a94ad;
+  font-size: 9px;
+}
+
+.agenda-time-block {
+  display: grid;
+  align-content: center;
+  text-align: center;
+}
+
+.agenda-time-block strong {
+  color: #6336f4 !important;
+}
+
+.agenda-time-block span {
+  color: #9aa3b7;
+  font-size: 8px;
+  font-weight: 800;
+}
+
+.agenda-side-title {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  color: #663bf0;
+}
+
+.agenda-side-title .agenda-side-label {
+  margin-bottom: 4px;
+}
+
+.agenda-side-title strong {
+  color: #2e3959;
+  font-size: 12px;
+}
+
+.meeting-room {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 11px 0;
+  border-bottom: 1px solid #edf0f5;
+}
+
+.meeting-room:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.meeting-room strong,
+.meeting-room span {
+  display: block;
+}
+
+.meeting-room strong {
+  color: #303b5c;
+  font-size: 11px;
+}
+
+.meeting-room span {
+  margin-top: 3px;
+  color: #8993aa;
+  font-size: 8px;
+}
+
+.meeting-room small {
+  flex: 0 0 auto;
+  color: #1b8a5e;
+  font-size: 8px;
+  font-weight: 800;
+}
+
+.room-booking-mock {
+  position: absolute;
+  top: 142px;
+  right: 20px;
+  z-index: 8;
+  width: 430px;
+  overflow: hidden;
+  border: 1px solid #dfe4ee;
+  border-radius: 15px;
+  background: #fff;
+  box-shadow: 0 22px 60px rgba(22, 33, 70, .2);
+}
+
+.room-booking-mock header,
+.room-booking-mock footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px 15px;
+}
+
+.room-booking-mock header {
+  border-bottom: 1px solid #edf0f5;
+}
+
+.room-booking-mock header > div {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.room-booking-mock header strong,
+.room-booking-mock header span {
+  display: block;
+}
+
+.room-booking-mock header strong {
+  color: #273252;
+  font-size: 12px;
+}
+
+.room-booking-mock header span {
+  color: #8b95ad;
+  font-size: 9px;
+}
+
+.room-booking-mock header button {
+  border: 0;
+  background: transparent;
+  color: #8490aa;
+  cursor: pointer;
+}
+
+.room-booking-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 11px;
+  padding: 14px 15px;
+}
+
+.room-booking-fields label:first-child {
+  grid-column: 1 / -1;
+}
+
+.room-booking-fields label > span {
+  display: block;
+  margin-bottom: 5px;
+  color: #79849e;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.room-booking-fields input,
+.mock-select {
+  width: 100%;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 10px;
+  border: 1px solid #dfe4ed;
+  border-radius: 8px;
+  background: #fafbfc;
+  color: #384360;
+  font-size: 10px;
+}
+
+.room-booking-fields input {
+  outline: 0;
+}
+
+.room-booking-mock footer {
+  border-top: 1px solid #edf0f5;
+  background: #fafbfc;
+}
+
+.room-booking-mock footer > span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #77839e;
+  font-size: 9px;
+}
+
+/* Chat */
+.chat-layout {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 270px minmax(0, 1fr);
+  flex: 1;
+}
+
+.chat-members {
+  overflow-y: auto;
+  padding: 14px 10px;
+  border-right: 1px solid #edf0f5;
+  background: #fafbfc;
+}
+
+.chat-search {
+  height: 38px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  margin: 0 5px 12px;
+  border: 1px solid #e1e5ed;
+  border-radius: 9px;
+  background: #fff;
+  color: #8b96ad;
+}
+
+.chat-search input {
+  min-width: 0;
+  flex: 1;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-size: 11px;
+}
+
+.chat-members-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 9px 9px;
+  color: #8a94ad;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+.chat-members-title button,
+.chat-conversation header > button {
+  border: 0;
+  background: transparent;
+  color: #8b95aa;
+  cursor: pointer;
+}
+
+.chat-member {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 9px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: #2b3555;
+  text-align: left;
+  cursor: pointer;
+}
+
+.chat-member:hover,
+.chat-member.active {
+  background: #f0edff;
+}
+
+.chat-member > span:nth-child(2) {
+  min-width: 0;
+}
+
+.chat-member strong,
+.chat-member small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chat-member strong {
+  font-size: 11px;
+}
+
+.chat-member small {
+  margin-top: 2px;
+  color: #8892aa;
+  font-size: 9px;
+}
+
+.chat-member > b {
+  min-width: 19px;
+  height: 19px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #6336f4;
+  color: #fff;
+  font-size: 9px;
+}
+
+.chat-avatar-wrap {
+  position: relative;
+  display: block;
+}
+
+.chat-avatar-wrap img,
+.chat-conversation header img {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.chat-avatar-wrap i {
+  position: absolute;
+  right: 0;
+  bottom: 1px;
+  width: 9px;
+  height: 9px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #21ad70;
+}
+
+.chat-conversation {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+}
+
+.chat-conversation > header {
+  min-height: 62px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 15px;
+  border-bottom: 1px solid #edf0f5;
+}
+
+.chat-conversation > header > div {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.chat-conversation > header strong,
+.chat-conversation > header span {
+  display: block;
+}
+
+.chat-conversation > header strong {
+  color: #2a3555;
+  font-size: 12px;
+}
+
+.chat-conversation > header span {
+  margin-top: 2px;
+  color: #25a46e;
+  font-size: 9px;
+}
+
+.chat-project-context {
+  margin: 11px 14px 0;
+  padding: 10px 12px;
+  border: 1px solid #e4e0fb;
+  border-radius: 10px;
+  background: #f7f5ff;
+}
+
+.chat-project-context span,
+.chat-project-context strong {
+  display: block;
+}
+
+.chat-project-context span {
+  color: #8b82b4;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+.chat-project-context strong {
+  margin-top: 3px;
+  color: #5f3ed0;
+  font-size: 10px;
+}
+
+.chat-messages {
+  min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  background:
+    radial-gradient(circle at 20% 10%, rgba(104, 75, 242, .035), transparent 28%),
+    #fff;
+}
+
+.chat-day-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+.chat-day-divider span {
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: #f2f4f8;
+  color: #8a94aa;
+  font-size: 8px;
+  font-weight: 800;
+}
+
+.chat-message {
+  max-width: 72%;
+  margin-bottom: 11px;
+}
+
+.chat-message p {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 13px;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.chat-message > span {
+  display: block;
+  margin-top: 3px;
+  color: #98a1b5;
+  font-size: 8px;
+}
+
+.chat-message.other p {
+  border: 1px solid #e6e9ef;
+  border-bottom-left-radius: 4px;
+  background: #fff;
+  color: #3a4561;
+}
+
+.chat-message.me {
+  margin-left: auto;
+}
+
+.chat-message.me p {
+  border-bottom-right-radius: 4px;
+  background: #6336f4;
+  color: #fff;
+}
+
+.chat-message.me > span {
+  text-align: right;
+}
+
+.chat-composer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 13px;
+  border-top: 1px solid #edf0f5;
+}
+
+.chat-composer input {
+  min-width: 0;
+  height: 40px;
+  flex: 1;
+  padding: 0 12px;
+  border: 1px solid #dfe4ed;
+  border-radius: 10px;
+  outline: 0;
+  background: #fafbfc;
+  font-size: 11px;
+}
+
+.chat-add,
+.chat-send {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.chat-add {
+  background: #f2f4f8;
+  color: #69758f;
+}
+
+.chat-send {
+  background: #6336f4;
+  color: #fff;
+}
+
+@media (max-width: 1100px) {
+  .workspace-panel-agenda,
+  .workspace-panel-chat {
+    width: calc(100vw - 112px);
+  }
+
+  .agenda-layout {
+    grid-template-columns: 1fr;
+    overflow-y: auto;
+  }
+
+  .calendar-shell {
+    overflow: visible;
+  }
+
+  .agenda-side {
+    border-top: 1px solid #edf0f5;
+    border-left: 0;
+  }
+}
+
+@media (max-width: 760px) {
+  .workspace-fab-group {
+    right: 14px;
+    bottom: 82px;
+  }
+
+  .workspace-fab {
+    min-width: 44px;
+    width: 44px;
+    height: 44px;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .workspace-fab span {
+    display: none;
+  }
+
+  .workspace-panel {
+    inset: 8px;
+    width: auto;
+    border-radius: 16px;
+  }
+
+  .workspace-panel-header p {
+    display: none;
+  }
+
+  .agenda-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .agenda-navigation {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .agenda-room-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .agenda-layout {
+    display: block;
+    overflow-y: auto;
+  }
+
+  .calendar-shell {
+    padding: 0 10px 16px;
+  }
+
+  .agenda-side {
+    padding: 10px;
+  }
+
+  .room-booking-mock {
+    top: 150px;
+    left: 12px;
+    right: 12px;
+    width: auto;
+  }
+
+  .room-booking-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .room-booking-fields label:first-child {
+    grid-column: auto;
+  }
+
+  .chat-layout {
+    grid-template-columns: 92px 1fr;
+  }
+
+  .chat-member {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+
+  .chat-member > span:nth-child(2),
+  .chat-member > b,
+  .chat-members-title span {
+    display: none;
+  }
+
+  .chat-members-title {
+    justify-content: center;
+  }
+
+  .chat-search input {
+    display: none;
+  }
+
+  .chat-search {
+    justify-content: center;
+    margin: 0 8px 12px;
+    padding: 0;
+  }
+
+  .chat-message {
+    max-width: 88%;
+  }
+}
