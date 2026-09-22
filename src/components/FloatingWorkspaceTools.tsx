@@ -204,6 +204,7 @@ export function FloatingWorkspaceTools() {
       <div className="workspace-fab-group" aria-label="Atalhos de colaboração">
         <button
           type="button"
+          aria-label="Agenda"
           className={`workspace-fab ${panel === 'agenda' ? 'active' : ''}`}
           onClick={() => togglePanel('agenda')}
         >
@@ -213,6 +214,7 @@ export function FloatingWorkspaceTools() {
 
         <button
           type="button"
+          aria-label="Chat"
           className={`workspace-fab ${panel === 'chat' ? 'active' : ''}`}
           onClick={() => togglePanel('chat')}
         >
