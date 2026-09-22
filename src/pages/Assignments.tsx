@@ -1,6 +1,8 @@
 import {
+  AlertTriangle,
   Building2,
   CheckCircle2,
+  Clock3,
   ExternalLink,
   Inbox,
   UserCheck,
@@ -11,9 +13,11 @@ import { PageTabs } from '../components/PageTabs'
 import { StatusPill } from '../components/StatusPill'
 import { assignments } from '../data/mock'
 import '../assignments-sei.css'
+import '../attention.css'
 
 const tabs = [
   'Últimas Movimentações',
+  'Atenção',
   'Processos SEI',
   'Chamados GLPI',
   'Demandas Internas',
@@ -37,6 +41,20 @@ type SeiProcess = {
   assignedToMe: boolean
   assignee?: string
   sender: string
+}
+
+type AttentionAssignment = {
+  id: string
+  source: 'SEI' | 'GLPI' | 'Interna'
+  title: string
+  subtitle: string
+  owner: string
+  context: string
+  status: 'Em análise' | 'Pendente' | 'Em andamento'
+  overdue: string
+  stale: string
+  deadline: string
+  externalUrl: string
 }
 
 const seiUnits: SeiUnit[] = [
@@ -145,6 +163,61 @@ const seiProcesses: SeiProcess[] = [
   },
 ]
 
+const attentionAssignments: AttentionAssignment[] = [
+  {
+    id: 'attention-sei-01',
+    source: 'SEI',
+    title: 'Processo 0024.009112/2026-73',
+    subtitle: 'Resposta técnica para contratação de serviço de TIC',
+    owner: 'Anderson Seixas',
+    context: 'Mesa SEI · SETIC-GSERV',
+    status: 'Em análise',
+    overdue: '5 dias de atraso',
+    stale: 'Sem movimentação há 8 dias',
+    deadline: '17/09/2026',
+    externalUrl: 'https://sei.ro.gov.br/',
+  },
+  {
+    id: 'attention-glpi-01',
+    source: 'GLPI',
+    title: 'Chamado #15284',
+    subtitle: 'Validação de indisponibilidade recorrente de serviço',
+    owner: 'Equipe GSERV',
+    context: 'Fila de atendimento · GSERV',
+    status: 'Pendente',
+    overdue: '3 dias de atraso',
+    stale: 'Sem movimentação há 6 dias',
+    deadline: '19/09/2026',
+    externalUrl: 'https://glpi.sistemas.ro.gov.br/',
+  },
+  {
+    id: 'attention-interna-01',
+    source: 'Interna',
+    title: 'Atualização do inventário de serviços',
+    subtitle: 'Consolidar informações pendentes das coordenações',
+    owner: 'Anderson Seixas',
+    context: 'Demanda interna · SETIC-GSERV',
+    status: 'Em andamento',
+    overdue: '2 dias de atraso',
+    stale: 'Sem movimentação há 5 dias',
+    deadline: '20/09/2026',
+    externalUrl: 'https://www.rondonia.ro.gov.br/',
+  },
+  {
+    id: 'attention-sei-02',
+    source: 'SEI',
+    title: 'Processo 0024.008709/2026-12',
+    subtitle: 'Manifestação sobre atualização do catálogo de serviços',
+    owner: 'Mesa SETIC-GSERV',
+    context: 'Sem atribuição nominal',
+    status: 'Pendente',
+    overdue: '1 dia de atraso',
+    stale: 'Sem movimentação há 4 dias',
+    deadline: '21/09/2026',
+    externalUrl: 'https://sei.ro.gov.br/',
+  },
+]
+
 export function Assignments() {
   const [active, setActive] = useState(tabs[0])
   const [selectedUnit, setSelectedUnit] = useState('SETIC-GSERV')
@@ -186,7 +259,94 @@ export function Assignments() {
 
       <PageTabs tabs={tabs} active={active} onChange={setActive} />
 
-      {active === 'Processos SEI' ? (
+      {active === 'Atenção' ? (
+        <section className="attention-workspace">
+          <div className="attention-intro">
+            <span className="attention-intro-icon">
+              <AlertTriangle size={18} />
+            </span>
+            <div>
+              <strong>Atribuições que precisam de atenção</strong>
+              <p>
+                Reúne itens de sistemas externos ou demandas internas que estão
+                atrasados e também não recebem movimentação há alguns dias.
+              </p>
+            </div>
+            <span className="attention-count">
+              {attentionAssignments.length} itens
+            </span>
+          </div>
+
+          <div className="attention-list">
+            {attentionAssignments.map((item) => (
+              <article className="attention-card" key={item.id}>
+                <div className="attention-rail" />
+
+                <div className="attention-card-content">
+                  <div className="attention-card-top">
+                    <div className="attention-badges">
+                      <span
+                        className={`attention-source ${item.source.toLowerCase()}`}
+                      >
+                        {item.source}
+                      </span>
+                      <span className="attention-badge overdue">
+                        <AlertTriangle size={13} />
+                        {item.overdue}
+                      </span>
+                      <span className="attention-badge stale">
+                        <Clock3 size={13} />
+                        {item.stale}
+                      </span>
+                    </div>
+
+                    <StatusPill>{item.status}</StatusPill>
+                  </div>
+
+                  <h3>{item.title}</h3>
+                  <p>{item.subtitle}</p>
+
+                  <div className="attention-meta">
+                    <span>
+                      <Building2 size={15} />
+                      <div>
+                        <small>Origem / contexto</small>
+                        <strong>{item.context}</strong>
+                      </div>
+                    </span>
+
+                    <span>
+                      <UserCheck size={15} />
+                      <div>
+                        <small>Responsável</small>
+                        <strong>{item.owner}</strong>
+                      </div>
+                    </span>
+
+                    <span>
+                      <Clock3 size={15} />
+                      <div>
+                        <small>Prazo</small>
+                        <strong>{item.deadline}</strong>
+                      </div>
+                    </span>
+                  </div>
+                </div>
+
+                <a
+                  className="attention-action"
+                  href={item.externalUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <ExternalLink size={15} />
+                  Abrir origem
+                </a>
+              </article>
+            ))}
+          </div>
+        </section>
+      ) : active === 'Processos SEI' ? (
         <section className="sei-workspace">
           <div className="sei-unit-panel">
             <div className="sei-unit-panel-header">

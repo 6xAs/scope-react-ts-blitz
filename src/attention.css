@@ -1,0 +1,240 @@
+/* Attention tabs: overdue + stale work */
+.attention-workspace {
+  display: grid;
+  gap: 16px;
+}
+
+.attention-intro {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 15px 17px;
+  border: 1px solid #ecd8c5;
+  border-radius: 12px;
+  background: #fffaf5;
+}
+
+.attention-intro-icon {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  background: #fff0df;
+  color: #bd6b19;
+}
+
+.attention-intro strong {
+  display: block;
+  color: #4e3b2b;
+  font-size: 13px;
+}
+
+.attention-intro p {
+  max-width: 850px;
+  margin: 3px 0 0;
+  color: #8a7564;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.attention-count {
+  padding: 6px 9px;
+  border: 1px solid #ead7c3;
+  border-radius: 999px;
+  background: #fff;
+  color: #936136;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.attention-list {
+  display: grid;
+  gap: 10px;
+}
+
+.attention-card {
+  display: grid;
+  grid-template-columns: 4px minmax(0, 1fr) auto;
+  gap: 16px;
+  overflow: hidden;
+  padding: 16px 16px 16px 0;
+  border: 1px solid #e9ddd2;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 4px 16px rgba(31, 45, 91, .02);
+}
+
+.attention-rail {
+  width: 4px;
+  align-self: stretch;
+  border-radius: 0 999px 999px 0;
+  background: #d57a27;
+}
+
+.attention-card-content {
+  min-width: 0;
+}
+
+.attention-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.attention-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.attention-badge,
+.attention-source {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 8px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.attention-badge.overdue {
+  background: #ffebe8;
+  color: #c44738;
+}
+
+.attention-badge.stale {
+  background: #fff3df;
+  color: #a96b1d;
+}
+
+.attention-source {
+  border: 1px solid #e2e6ed;
+  background: #f5f7fa;
+  color: #64708a;
+}
+
+.attention-source.sei {
+  border-color: #d9e3f5;
+  background: #eff5ff;
+  color: #3768a8;
+}
+
+.attention-source.glpi {
+  border-color: #dce8df;
+  background: #f0f8f2;
+  color: #3f7952;
+}
+
+.attention-source.interna {
+  border-color: #e4def6;
+  background: #f6f3ff;
+  color: #6651a7;
+}
+
+.attention-card h3 {
+  margin: 11px 0 4px;
+  color: #202c4e;
+  font-size: 14px;
+}
+
+.attention-card p {
+  margin: 0;
+  color: #7d879f;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.attention-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 22px;
+  margin-top: 13px;
+  padding-top: 11px;
+  border-top: 1px solid #edf0f5;
+}
+
+.attention-meta > span {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 150px;
+  color: #8390a8;
+}
+
+.attention-meta small,
+.attention-meta strong {
+  display: block;
+}
+
+.attention-meta small {
+  margin-bottom: 2px;
+  color: #a0a7b5;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.attention-meta strong {
+  color: #66718d;
+  font-size: 10px;
+}
+
+.attention-action {
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 11px;
+  border: 1px solid #e3d8cf;
+  border-radius: 8px;
+  background: #fffaf6;
+  color: #8d5b31;
+  font-size: 10px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.attention-action:hover {
+  border-color: #d7c5b6;
+  background: #fff5ec;
+  color: #714522;
+}
+
+@media (max-width: 760px) {
+  .attention-intro {
+    grid-template-columns: 36px minmax(0, 1fr);
+  }
+
+  .attention-count {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .attention-card {
+    grid-template-columns: 4px minmax(0, 1fr);
+    padding-right: 12px;
+  }
+
+  .attention-card-top {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .attention-action {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .attention-meta {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 9px;
+  }
+}
