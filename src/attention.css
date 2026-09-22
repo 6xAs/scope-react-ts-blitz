@@ -238,3 +238,67 @@
     gap: 9px;
   }
 }
+
+
+/* Project attention */
+.project-attention-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 11px;
+}
+
+.project-attention-main img {
+  width: 52px;
+  height: 52px;
+  flex: 0 0 auto;
+  border-radius: 10px;
+  object-fit: cover;
+}
+
+.project-attention-main h3 {
+  margin-top: 0;
+}
+
+.project-attention-main p {
+  max-width: 760px;
+}
+
+.project-attention-meta {
+  align-items: center;
+}
+
+.project-attention-progress {
+  min-width: 150px;
+}
+
+.project-attention-progress small,
+.project-attention-progress strong {
+  display: block;
+}
+
+.project-attention-progress > div {
+  width: 145px;
+  height: 6px;
+  margin: 5px 0 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e9edf3;
+}
+
+.project-attention-progress > div span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: #d57a27;
+}
+
+@media (max-width: 760px) {
+  .project-attention-main {
+    align-items: flex-start;
+  }
+
+  .project-attention-progress > div {
+    width: min(180px, 60vw);
+  }
+}

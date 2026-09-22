@@ -1,6 +1,8 @@
 import {
+  AlertTriangle,
   Archive,
   ArrowUpRight,
+  Clock3,
   Copy,
   ExternalLink,
   MoreVertical,
@@ -14,9 +16,11 @@ import { PageTabs } from '../components/PageTabs'
 import { StatusPill } from '../components/StatusPill'
 import { projects } from '../data/mock'
 import '../project-kanban.css'
+import '../attention.css'
 
 const tabs = [
   'Últimas Movimentações',
+  'Atenção',
   'Minha Equipe',
   'Em Andamento',
   'Planejamento',
@@ -36,7 +40,12 @@ export function Projects() {
     return () => document.removeEventListener('click', closeMenu)
   }, [])
 
-  const list = active === tabs[0] ? projects.slice(0, 4) : projects
+  const attentionProjects = projects.filter((project) => project.attention)
+
+  const list =
+    active === tabs[0]
+      ? projects.filter((project) => !project.attention).slice(0, 4)
+      : projects
 
   return (
     <div>
@@ -56,7 +65,117 @@ export function Projects() {
 
       <PageTabs tabs={tabs} active={active} onChange={setActive} />
 
-      <div className="cards-grid project-grid">
+      {active === 'Atenção' ? (
+        <section className="attention-workspace">
+          <div className="attention-intro">
+            <span className="attention-intro-icon">
+              <AlertTriangle size={18} />
+            </span>
+
+            <div>
+              <strong>Projetos que precisam de atenção</strong>
+              <p>
+                Projetos entram aqui quando apresentam baixa movimentação, pouca
+                participação da equipe ou marcos que permanecem sem avanço.
+              </p>
+            </div>
+
+            <span className="attention-count">
+              {attentionProjects.length} projetos
+            </span>
+          </div>
+
+          <div className="attention-list">
+            {attentionProjects.map((project) => (
+              <article
+                className="attention-card project-attention-card"
+                key={project.id}
+              >
+                <div className="attention-rail" />
+
+                <div className="attention-card-content">
+                  <div className="attention-card-top">
+                    <div className="attention-badges">
+                      <span className="attention-badge overdue">
+                        <Clock3 size={13} />
+                        {project.attention?.staleDays} dias sem movimentação relevante
+                      </span>
+
+                      <span className="attention-badge stale">
+                        <Users size={13} />
+                        Participação {project.attention?.participationPercent}%
+                      </span>
+                    </div>
+
+                    <StatusPill>{project.status}</StatusPill>
+                  </div>
+
+                  <div className="project-attention-main">
+                    <img src={project.image} alt="" />
+
+                    <div>
+                      <h3>{project.title}</h3>
+                      <p>{project.attention?.reason}</p>
+                    </div>
+                  </div>
+
+                  <div className="attention-meta project-attention-meta">
+                    <span>
+                      <Users size={15} />
+                      <div>
+                        <small>Participação</small>
+                        <strong>
+                          {project.attention?.activeMembers} de{' '}
+                          {project.attention?.teamSize} membros ativos
+                        </strong>
+                      </div>
+                    </span>
+
+                    <span>
+                      <Clock3 size={15} />
+                      <div>
+                        <small>Última movimentação</small>
+                        <strong>{project.updated}</strong>
+                      </div>
+                    </span>
+
+                    <span>
+                      <AlertTriangle size={15} />
+                      <div>
+                        <small>Marcos pendentes</small>
+                        <strong>
+                          {project.attention?.pendingMilestones} aguardando avanço
+                        </strong>
+                      </div>
+                    </span>
+
+                    <span>
+                      <div className="project-attention-progress">
+                        <small>Progresso geral</small>
+                        <div>
+                          <span style={{ width: `${project.progress}%` }} />
+                        </div>
+                        <strong>{project.progress}%</strong>
+                      </div>
+                    </span>
+                  </div>
+                </div>
+
+                <a
+                  className="attention-action"
+                  href={`/kanban/projeto/${project.id}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Acompanhar projeto
+                  <ArrowUpRight size={15} />
+                </a>
+              </article>
+            ))}
+          </div>
+        </section>
+      ) : (
+        <div className="cards-grid project-grid">
         {list.map((project) => (
           <article className="project-card project-card-refined" key={project.id}>
             <div
@@ -154,7 +273,8 @@ export function Projects() {
             </a>
           </article>
         ))}
-      </div>
+        </div>
+      )}
     </div>
   )
 }

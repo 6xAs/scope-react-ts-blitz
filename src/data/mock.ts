@@ -8,6 +8,14 @@ export type Project = {
   image: string
   hasExternal?: boolean
   externalUrl?: string
+  attention?: {
+    reason: string
+    staleDays: number
+    participationPercent: number
+    activeMembers: number
+    teamSize: number
+    pendingMilestones: number
+  }
 }
 
 export type Task = {
@@ -62,10 +70,18 @@ export const projects: Project[] = [
     subtitle: 'Infraestrutura de rede',
     status: 'Planejamento',
     progress: 25,
-    updated: 'há 4 horas',
+    updated: 'há 9 dias',
     image:
       'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=80',
     hasExternal: true,
+    attention: {
+      reason: 'Baixa movimentação e pouca participação da equipe nas últimas etapas.',
+      staleDays: 9,
+      participationPercent: 29,
+      activeMembers: 2,
+      teamSize: 7,
+      pendingMilestones: 2,
+    },
   },
   {
     id: 'portal-institucional',
@@ -73,9 +89,17 @@ export const projects: Project[] = [
     subtitle: 'Comunicação e Tecnologia',
     status: 'Em andamento',
     progress: 60,
-    updated: 'há 1 dia',
+    updated: 'há 6 dias',
     image:
       'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=900&q=80',
+    attention: {
+      reason: 'Poucos membros registraram atividade e há entregas aguardando avanço.',
+      staleDays: 6,
+      participationPercent: 17,
+      activeMembers: 1,
+      teamSize: 6,
+      pendingMilestones: 1,
+    },
   },
   {
     id: 'datacenter',
