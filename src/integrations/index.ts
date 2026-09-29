@@ -1,12 +1,15 @@
 import { integrationAdapters } from './adapters/mockAdapters'
 import type { ServiceCatalogItem, WorkItem } from './types'
+import { currentUser } from '../context/currentUser'
 
 export async function getUnifiedWorkItems(): Promise<WorkItem[]> {
   const groups = await Promise.all(
     integrationAdapters.map((adapter) => adapter.listWorkItems()),
   )
 
-  return groups.flat()
+  return groups
+    .flat()
+    .filter((item) => currentUser.enabledSources.includes(item.source))
 }
 
 export async function getUnifiedServiceCatalog(): Promise<ServiceCatalogItem[]> {
@@ -14,7 +17,9 @@ export async function getUnifiedServiceCatalog(): Promise<ServiceCatalogItem[]> 
     integrationAdapters.map((adapter) => adapter.listServices()),
   )
 
-  return groups.flat()
+  return groups
+    .flat()
+    .filter((service) => currentUser.enabledSources.includes(service.source))
 }
 
 export function sourceLabel(
