@@ -15,7 +15,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { PageTabs } from '../components/PageTabs'
 import { StatusPill } from '../components/StatusPill'
 import { getUnifiedServiceCatalog, getUnifiedWorkItems, sourceLabel } from '../integrations'
-import type { ServiceCatalogItem, WorkItem } from '../integrations/types'
+import type { ServiceCatalogItem, ServiceCategory, WorkItem } from '../integrations/types'
 import { currentUser, hasRole } from '../context/currentUser'
 import '../assignments-sei.css'
 import '../attention.css'
@@ -162,6 +162,7 @@ export function Assignments() {
   const [selectedUnit, setSelectedUnit] = useState(currentUser.unit)
   const [catalogOpen, setCatalogOpen] = useState(false)
   const [query, setQuery] = useState('')
+  const [serviceCategory, setServiceCategory] = useState<'Todos' | ServiceCategory>('Todos')
   const [workItems, setWorkItems] = useState<WorkItem[]>([])
   const [catalog, setCatalog] = useState<ServiceCatalogItem[]>([])
 
@@ -218,15 +219,40 @@ export function Assignments() {
     return []
   }, [active, workItems])
 
+  const serviceCategories = useMemo(
+    () =>
+      ['Todos', ...Array.from(new Set(catalog.map((service) => service.category)))] as (
+        | 'Todos'
+        | ServiceCategory
+      )[],
+    [catalog],
+  )
+
   const services = catalog.filter((service) => {
     const term = query.trim().toLowerCase()
+    const matchesCategory =
+      serviceCategory === 'Todos' || service.category === serviceCategory
+
+    if (!matchesCategory) return false
     if (!term) return true
 
-    return (
-      service.title.toLowerCase().includes(term) ||
-      service.description.toLowerCase().includes(term)
-    )
+    const haystack = [
+      service.title,
+      service.description,
+      service.category,
+      sourceLabel(service.source),
+      ...(service.keywords ?? []),
+    ]
+      .join(' ')
+      .toLowerCase()
+
+    return haystack.includes(term)
   })
+
+  const featuredServices =
+    query || serviceCategory !== 'Todos'
+      ? []
+      : catalog.filter((service) => service.featured).slice(0, 4)
 
   const currentUnit = seiUnits.find((unit) => unit.id === selectedUnit) ?? seiUnits[3]
 
@@ -610,9 +636,41 @@ export function Assignments() {
                 autoFocus
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Buscar serviço..."
+                placeholder="O que você precisa?"
               />
             </label>
+
+            <div className="service-category-row" aria-label="Categorias de serviço">
+              {serviceCategories.map((category) => (
+                <button
+                  key={category}
+                  type="button"
+                  className={serviceCategory === category ? 'active' : ''}
+                  onClick={() => setServiceCategory(category)}
+                >
+                  {category}
+                </button>
+              ))}
+            </div>
+
+            {featuredServices.length > 0 && (
+              <section className="service-featured">
+                <span className="service-section-label">Mais utilizados</span>
+                <div className="service-featured-grid">
+                  {featuredServices.map((service) => (
+                    <a
+                      key={service.id}
+                      href={service.externalUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <strong>{service.title}</strong>
+                      <small>{sourceLabel(service.source)}</small>
+                    </a>
+                  ))}
+                </div>
+              </section>
+            )}
 
             <div className="service-catalog-list">
               {services.map((service) => (
@@ -626,10 +684,22 @@ export function Assignments() {
                   <div>
                     <strong>{service.title}</strong>
                     <small>{service.description}</small>
+                    {service.availabilityLabel && (
+                      <em>{service.availabilityLabel}</em>
+                    )}
                   </div>
-                  <span>{sourceLabel(service.source)}</span>
+
+                  <span>
+                    {service.actionLabel ?? sourceLabel(service.source)}
+                  </span>
                 </a>
               ))}
+
+              {services.length === 0 && (
+                <div className="interop-empty">
+                  Nenhum serviço encontrado para esta busca.
+                </div>
+              )}
             </div>
           </aside>
         </div>
