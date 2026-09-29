@@ -8,7 +8,11 @@ import {
   Search,
   Settings,
 } from 'lucide-react'
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
+import { buildGlobalSearchIndex, searchGlobalIndex } from '../search/globalSearch'
+import type { GlobalSearchResult } from '../search/globalSearch'
+import '../interoperability.css'
 import { FloatingWorkspaceTools } from './FloatingWorkspaceTools'
 
 const nav = [
@@ -20,6 +24,31 @@ const nav = [
 ]
 
 export function AppShell() {
+  const navigate = useNavigate()
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchIndex, setSearchIndex] = useState<GlobalSearchResult[]>([])
+  const [searchFocused, setSearchFocused] = useState(false)
+
+  useEffect(() => {
+    buildGlobalSearchIndex().then(setSearchIndex)
+  }, [])
+
+  const searchResults = useMemo(
+    () => searchGlobalIndex(searchIndex, searchQuery),
+    [searchIndex, searchQuery],
+  )
+
+  const openResult = (result: GlobalSearchResult) => {
+    if (result.external) {
+      window.open(result.href, '_blank', 'noopener,noreferrer')
+    } else {
+      navigate(result.href)
+    }
+
+    setSearchQuery('')
+    setSearchFocused(false)
+  }
+
   return (
     <div className="app-shell">
       <aside className="sidebar">
@@ -67,10 +96,53 @@ export function AppShell() {
 
       <main className="main-column">
         <header className="topbar">
-          <label className="search">
-            <Search size={18} />
-            <input placeholder="Buscar no sistema..." />
-          </label>
+          <div className="global-search-shell">
+            <label className="search global-search-input">
+              <Search size={18} />
+              <input
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                onFocus={() => setSearchFocused(true)}
+                onBlur={() => window.setTimeout(() => setSearchFocused(false), 120)}
+                placeholder="Buscar projetos, SEI, GLPI, serviços..."
+                aria-label="Busca global"
+              />
+            </label>
+
+            {searchFocused && searchQuery.trim().length >= 2 && (
+              <div className="global-search-results">
+                <div className="global-search-head">
+                  <span>Busca no Scope</span>
+                  <small>{searchResults.length} resultados</small>
+                </div>
+
+                {searchResults.map((result) => (
+                  <button
+                    type="button"
+                    key={result.id}
+                    className="global-search-result"
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => openResult(result)}
+                  >
+                    <div>
+                      <strong>{result.title}</strong>
+                      <small>{result.description}</small>
+                    </div>
+                    <span>
+                      <b>{result.type}</b>
+                      <small>{result.source}</small>
+                    </span>
+                  </button>
+                ))}
+
+                {searchResults.length === 0 && (
+                  <div className="global-search-empty">
+                    Nenhum resultado encontrado.
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
 
           <button className="icon-button">
             <Bell size={20} />
