@@ -13,7 +13,7 @@ import { FloatingWorkspaceTools } from './FloatingWorkspaceTools'
 
 const nav = [
   { to: '/', label: 'Home', icon: Home },
-  { to: '/atribuicoes', label: 'Atribuições Vinculadas', icon: Link2 },
+  { to: '/atribuicoes', label: 'Acompanhamentos', icon: Link2 },
   { to: '/tarefas', label: 'Tarefas', icon: CheckSquare2 },
   { to: '/projetos', label: 'Projetos', icon: FolderKanban },
   { to: '/relatorios', label: 'Relatórios', icon: BarChart3 },

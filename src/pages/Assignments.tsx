@@ -5,23 +5,28 @@ import {
   Clock3,
   ExternalLink,
   Inbox,
+  Plus,
+  Search,
   UserCheck,
   Users,
+  X,
 } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { PageTabs } from '../components/PageTabs'
 import { StatusPill } from '../components/StatusPill'
-import { assignments } from '../data/mock'
+import { getUnifiedServiceCatalog, getUnifiedWorkItems, sourceLabel } from '../integrations'
+import type { ServiceCatalogItem, WorkItem } from '../integrations/types'
 import '../assignments-sei.css'
 import '../attention.css'
+import '../interoperability.css'
 
 const tabs = [
   'Últimas Movimentações',
   'Atenção',
+  'Atribuições',
+  'Solicitações',
+  'Atendimentos',
   'Processos SEI',
-  'Chamados GLPI',
-  'Demandas Internas',
-  'Blocos de Assinatura',
 ]
 
 type SeiUnit = {
@@ -45,7 +50,7 @@ type SeiProcess = {
 
 type AttentionAssignment = {
   id: string
-  source: 'SEI' | 'GLPI' | 'Interna'
+  source: 'SEI' | 'GLPI' | 'Interna' | 'Portal' | 'Alpha'
   title: string
   subtitle: string
   owner: string
@@ -216,26 +221,74 @@ const attentionAssignments: AttentionAssignment[] = [
     deadline: '21/09/2026',
     externalUrl: 'https://sei.ro.gov.br/',
   },
+  {
+    id: 'attention-portal-01',
+    source: 'Portal',
+    title: 'Solicitação de acesso ao SEI',
+    subtitle: 'Pedido funcional aguardando análise do RH Setorial',
+    owner: 'RH Setorial',
+    context: 'Portal do Servidor',
+    status: 'Em análise',
+    overdue: 'Aguardando análise',
+    stale: 'Sem atualização há 2 dias',
+    deadline: '—',
+    externalUrl: 'https://portaldoservidor.sistemas.ro.gov.br/',
+  },
+  {
+    id: 'attention-alpha-01',
+    source: 'Alpha',
+    title: 'Atendimento #1932',
+    subtitle: 'Solicitação do cidadão aguardando atendimento da unidade',
+    owner: 'Fila da unidade',
+    context: 'Alpha · Atendimento ao cidadão',
+    status: 'Pendente',
+    overdue: 'Aguardando atendimento',
+    stale: 'Recebido há 38 min',
+    deadline: 'Hoje',
+    externalUrl: 'https://alpha.sistemas.ro.gov.br/',
+  },
 ]
 
 export function Assignments() {
   const [active, setActive] = useState(tabs[0])
   const [selectedUnit, setSelectedUnit] = useState('SETIC-GSERV')
+  const [catalogOpen, setCatalogOpen] = useState(false)
+  const [query, setQuery] = useState('')
+  const [workItems, setWorkItems] = useState<WorkItem[]>([])
+  const [catalog, setCatalog] = useState<ServiceCatalogItem[]>([])
 
-  const list =
-    active === tabs[0]
-      ? assignments.slice(0, 4)
-      : assignments.filter((assignment) => {
-          if (active === 'Processos SEI') {
-            return assignment.source === 'SEI'
-          }
+  useEffect(() => {
+    Promise.all([getUnifiedWorkItems(), getUnifiedServiceCatalog()]).then(
+      ([items, services]) => {
+        setWorkItems(items)
+        setCatalog(services)
+      },
+    )
+  }, [])
 
-          if (active === 'Chamados GLPI') {
-            return assignment.source === 'GLPI'
-          }
+  const list = useMemo(() => {
+    if (active === 'Últimas Movimentações') return workItems.slice(0, 4)
+    if (active === 'Atribuições') {
+      return workItems.filter((item) => item.kind === 'atribuicao')
+    }
+    if (active === 'Solicitações') {
+      return workItems.filter((item) => item.kind === 'solicitacao')
+    }
+    if (active === 'Atendimentos') {
+      return workItems.filter((item) => item.kind === 'atendimento')
+    }
+    return []
+  }, [active, workItems])
 
-          return true
-        })
+  const services = catalog.filter((service) => {
+    const term = query.trim().toLowerCase()
+    if (!term) return true
+
+    return (
+      service.title.toLowerCase().includes(term) ||
+      service.description.toLowerCase().includes(term)
+    )
+  })
 
   const currentUnit = seiUnits.find((unit) => unit.id === selectedUnit) ?? seiUnits[3]
 
@@ -250,10 +303,21 @@ export function Assignments() {
     <div>
       <div className="title-row">
         <div>
-          <h1>Atribuições Vinculadas</h1>
+          <h1>Acompanhamentos</h1>
           <p>
-            Itens que nascem em outros sistemas, mas impactam seu trabalho no Scope.
+            Acompanhe em um único lugar o que depende de você ou impacta seu trabalho.
           </p>
+        </div>
+
+        <div className="interop-title-actions">
+          <button
+            type="button"
+            className="primary"
+            onClick={() => setCatalogOpen(true)}
+          >
+            <Plus size={17} />
+            Solicitar
+          </button>
         </div>
       </div>
 
@@ -523,33 +587,98 @@ export function Assignments() {
         </section>
       ) : (
         <div className="cards-grid assignment-grid">
-          {list.map((assignment) => (
-            <article className="assignment-card" key={assignment.id}>
-              <div className={`source-badge ${assignment.source.toLowerCase()}`}>
-                {assignment.source}
-              </div>
+          {list.map((item) => (
+            <article className="assignment-card" key={item.id}>
+              <div className="interop-source">{sourceLabel(item.source)}</div>
 
-              <h3>{assignment.title}</h3>
-              <p>{assignment.subtitle}</p>
-              <StatusPill>{assignment.status}</StatusPill>
+              <h3>{item.title}</h3>
+              <p>{item.description}</p>
+              <StatusPill>{item.status}</StatusPill>
 
               <div className="assignment-note">
-                Última movimentação registrada {assignment.updated}.
+                Última movimentação registrada {item.updated}.
               </div>
 
-              <small>{assignment.owner}</small>
+              <small>{item.owner}</small>
 
-              <a
-                className="primary small link-btn"
-                href={assignment.externalUrl}
-                target="_blank"
-                rel="noreferrer"
-              >
-                <ExternalLink size={15} />
-                Abrir sistema externo
-              </a>
+              {item.externalUrl && (
+                <a
+                  className="primary small link-btn"
+                  href={item.externalUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <ExternalLink size={15} />
+                  {item.actionLabel ?? 'Abrir origem'}
+                </a>
+              )}
             </article>
           ))}
+
+          {list.length === 0 && (
+            <div className="interop-empty">
+              Nenhum item para exibir neste acompanhamento.
+            </div>
+          )}
+        </div>
+      )}
+
+      {catalogOpen && (
+        <div
+          className="service-catalog-backdrop"
+          onMouseDown={() => setCatalogOpen(false)}
+        >
+          <aside
+            className="service-catalog-panel"
+            onMouseDown={(event) => event.stopPropagation()}
+          >
+            <div className="service-catalog-head">
+              <div>
+                <h2>Solicitar serviço</h2>
+                <p>
+                  Encontre o que precisa sem ter que lembrar em qual sistema o
+                  serviço está.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                className="service-catalog-close"
+                onClick={() => setCatalogOpen(false)}
+                aria-label="Fechar catálogo"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <label className="service-catalog-search">
+              <Search size={17} />
+              <input
+                autoFocus
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Buscar serviço..."
+              />
+            </label>
+
+            <div className="service-catalog-list">
+              {services.map((service) => (
+                <a
+                  key={service.id}
+                  className="service-catalog-item"
+                  href={service.externalUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <div>
+                    <strong>{service.title}</strong>
+                    <small>{service.description}</small>
+                  </div>
+                  <span>{sourceLabel(service.source)}</span>
+                </a>
+              ))}
+            </div>
+          </aside>
         </div>
       )}
     </div>
