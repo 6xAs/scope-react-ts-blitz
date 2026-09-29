@@ -1,14 +1,28 @@
 import { useEffect, useState } from 'react'
-import { ArrowRight, CheckSquare2, FolderKanban, Link2 } from 'lucide-react'
+import { AlertCircle, ArrowRight, CheckSquare2, FileText, FolderKanban, LifeBuoy, Link2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { StatusPill } from '../components/StatusPill'
-import { assignments, projects, tasks } from '../data/mock'
+import { projects, tasks } from '../data/mock'
+import { getUnifiedWorkItems, sourceLabel } from '../integrations'
+import type { WorkItem } from '../integrations/types'
+import '../interoperability.css'
 
 const heroFallback =
   'linear-gradient(90deg, rgba(18, 73, 176, 0.92), rgba(26, 126, 255, 0.48))'
 
+function SourceIcon({ item }: { item: WorkItem }) {
+  if (item.source === 'SEI') return <FileText size={18} />
+  if (item.source === 'GLPI') return <LifeBuoy size={18} />
+  return <Link2 size={18} />
+}
+
 export function Home() {
   const [heroBackground, setHeroBackground] = useState(heroFallback)
+  const [externalItems, setExternalItems] = useState<WorkItem[]>([])
+
+  useEffect(() => {
+    getUnifiedWorkItems().then(setExternalItems)
+  }, [])
 
   useEffect(() => {
     let active = true
@@ -32,6 +46,9 @@ export function Home() {
     }
   }, [])
 
+  const attentionCount = externalItems.filter((item) => item.attention).length
+  const recentExternal = externalItems.slice(0, 2)
+
   return (
     <div>
       <div className="home-hero">
@@ -41,6 +58,17 @@ export function Home() {
           <span>
             Acompanhe o essencial e avance para os detalhes apenas quando precisar.
           </span>
+
+          {attentionCount > 0 && (
+            <Link to="/atribuicoes" className="home-attention-link">
+              <AlertCircle size={16} />
+              <span>
+                <strong>{attentionCount}</strong>{' '}
+                {attentionCount === 1 ? 'item precisa' : 'itens precisam'} da sua atenção
+              </span>
+              <ArrowRight size={15} />
+            </Link>
+          )}
         </div>
 
         <div
@@ -53,13 +81,19 @@ export function Home() {
 
       <div className="home-grid">
         <section className="panel panel-wide">
-          <div className="panel-head">
-            <h2>Últimas Movimentações</h2>
-            <span>Somente o que mudou recentemente.</span>
+          <div className="panel-head inline">
+            <div>
+              <h2>Últimas Movimentações</h2>
+              <span>Somente o que mudou recentemente, dentro e fora do Scope.</span>
+            </div>
+
+            <Link to="/atribuicoes">
+              Acompanhamentos <ArrowRight size={15} />
+            </Link>
           </div>
 
           <div className="movement-list">
-            {projects.slice(0, 2).map((project, index) => (
+            {projects.slice(0, 1).map((project, index) => (
               <div className="movement-row" key={project.id}>
                 <div className="movement-icon">
                   <FolderKanban size={18} />
@@ -91,19 +125,23 @@ export function Home() {
               <time>há 1 dia</time>
             </div>
 
-            <div className="movement-row">
-              <div className="movement-icon">
-                <Link2 size={18} />
-              </div>
+            {recentExternal.map((item) => (
+              <div className="movement-row" key={item.id}>
+                <div className="movement-icon">
+                  <SourceIcon item={item} />
+                </div>
 
-              <div>
-                <strong>{assignments[0].title}</strong>
-                <small>Atribuição vinculada ao seu trabalho.</small>
-              </div>
+                <div>
+                  <strong>{item.title}</strong>
+                  <small>
+                    {item.description} · {sourceLabel(item.source)}
+                  </small>
+                </div>
 
-              <StatusPill>{assignments[0].status}</StatusPill>
-              <time>há 1 dia</time>
-            </div>
+                <StatusPill>{item.status}</StatusPill>
+                <time>{item.updated}</time>
+              </div>
+            ))}
           </div>
         </section>
 
