@@ -16,16 +16,16 @@ import { PageTabs } from '../components/PageTabs'
 import { StatusPill } from '../components/StatusPill'
 import { getUnifiedServiceCatalog, getUnifiedWorkItems, sourceLabel } from '../integrations'
 import type { ServiceCatalogItem, WorkItem } from '../integrations/types'
+import { currentUser, hasRole } from '../context/currentUser'
 import '../assignments-sei.css'
 import '../attention.css'
 import '../interoperability.css'
 
-const tabs = [
+const baseTabs = [
   'Últimas Movimentações',
   'Atenção',
   'Atribuições',
   'Solicitações',
-  'Atendimentos',
   'Processos SEI',
 ]
 
@@ -48,19 +48,6 @@ type SeiProcess = {
   sender: string
 }
 
-type AttentionAssignment = {
-  id: string
-  source: 'SEI' | 'GLPI' | 'Interna' | 'Portal' | 'Alpha'
-  title: string
-  subtitle: string
-  owner: string
-  context: string
-  status: 'Em análise' | 'Pendente' | 'Em andamento'
-  overdue: string
-  stale: string
-  deadline: string
-  externalUrl: string
-}
 
 const seiUnits: SeiUnit[] = [
   {
@@ -168,89 +155,10 @@ const seiProcesses: SeiProcess[] = [
   },
 ]
 
-const attentionAssignments: AttentionAssignment[] = [
-  {
-    id: 'attention-sei-01',
-    source: 'SEI',
-    title: 'Processo 0024.009112/2026-73',
-    subtitle: 'Resposta técnica para contratação de serviço de TIC',
-    owner: 'Anderson Seixas',
-    context: 'Mesa SEI · SETIC-GSERV',
-    status: 'Em análise',
-    overdue: '5 dias de atraso',
-    stale: 'Sem movimentação há 8 dias',
-    deadline: '17/09/2026',
-    externalUrl: 'https://sei.ro.gov.br/',
-  },
-  {
-    id: 'attention-glpi-01',
-    source: 'GLPI',
-    title: 'Chamado #15284',
-    subtitle: 'Validação de indisponibilidade recorrente de serviço',
-    owner: 'Equipe GSERV',
-    context: 'Fila de atendimento · GSERV',
-    status: 'Pendente',
-    overdue: '3 dias de atraso',
-    stale: 'Sem movimentação há 6 dias',
-    deadline: '19/09/2026',
-    externalUrl: 'https://glpi.sistemas.ro.gov.br/',
-  },
-  {
-    id: 'attention-interna-01',
-    source: 'Interna',
-    title: 'Atualização do inventário de serviços',
-    subtitle: 'Consolidar informações pendentes das coordenações',
-    owner: 'Anderson Seixas',
-    context: 'Demanda interna · SETIC-GSERV',
-    status: 'Em andamento',
-    overdue: '2 dias de atraso',
-    stale: 'Sem movimentação há 5 dias',
-    deadline: '20/09/2026',
-    externalUrl: 'https://www.rondonia.ro.gov.br/',
-  },
-  {
-    id: 'attention-sei-02',
-    source: 'SEI',
-    title: 'Processo 0024.008709/2026-12',
-    subtitle: 'Manifestação sobre atualização do catálogo de serviços',
-    owner: 'Mesa SETIC-GSERV',
-    context: 'Sem atribuição nominal',
-    status: 'Pendente',
-    overdue: '1 dia de atraso',
-    stale: 'Sem movimentação há 4 dias',
-    deadline: '21/09/2026',
-    externalUrl: 'https://sei.ro.gov.br/',
-  },
-  {
-    id: 'attention-portal-01',
-    source: 'Portal',
-    title: 'Solicitação de acesso ao SEI',
-    subtitle: 'Pedido funcional aguardando análise do RH Setorial',
-    owner: 'RH Setorial',
-    context: 'Portal do Servidor',
-    status: 'Em análise',
-    overdue: 'Aguardando análise',
-    stale: 'Sem atualização há 2 dias',
-    deadline: '—',
-    externalUrl: 'https://portaldoservidor.sistemas.ro.gov.br/',
-  },
-  {
-    id: 'attention-alpha-01',
-    source: 'Alpha',
-    title: 'Atendimento #1932',
-    subtitle: 'Solicitação do cidadão aguardando atendimento da unidade',
-    owner: 'Fila da unidade',
-    context: 'Alpha · Atendimento ao cidadão',
-    status: 'Pendente',
-    overdue: 'Aguardando atendimento',
-    stale: 'Recebido há 38 min',
-    deadline: 'Hoje',
-    externalUrl: 'https://alpha.sistemas.ro.gov.br/',
-  },
-]
+
 
 export function Assignments() {
-  const [active, setActive] = useState(tabs[0])
+  const [active, setActive] = useState(baseTabs[0])
   const [selectedUnit, setSelectedUnit] = useState('SETIC-GSERV')
   const [catalogOpen, setCatalogOpen] = useState(false)
   const [query, setQuery] = useState('')
@@ -265,6 +173,24 @@ export function Assignments() {
       },
     )
   }, [])
+
+  const visibleTabs = useMemo(() => {
+    const result = [...baseTabs]
+    const hasAttendances =
+      hasRole('alpha_attendant') &&
+      workItems.some((item) => item.kind === 'atendimento')
+
+    if (hasAttendances) {
+      result.splice(4, 0, 'Atendimentos')
+    }
+
+    return result
+  }, [workItems])
+
+  const attentionItems = useMemo(
+    () => workItems.filter((item) => item.attention),
+    [workItems],
+  )
 
   const list = useMemo(() => {
     if (active === 'Últimas Movimentações') return workItems.slice(0, 4)
@@ -306,6 +232,9 @@ export function Assignments() {
           <h1>Acompanhamentos</h1>
           <p>
             Acompanhe em um único lugar o que depende de você ou impacta seu trabalho.
+            <span className="interop-user-context">
+              {currentUser.unit} · conteúdo adaptado ao seu perfil
+            </span>
           </p>
         </div>
 
@@ -321,7 +250,7 @@ export function Assignments() {
         </div>
       </div>
 
-      <PageTabs tabs={tabs} active={active} onChange={setActive} />
+      <PageTabs tabs={visibleTabs} active={active} onChange={setActive} />
 
       {active === 'Atenção' ? (
         <section className="attention-workspace">
@@ -330,37 +259,35 @@ export function Assignments() {
               <AlertTriangle size={18} />
             </span>
             <div>
-              <strong>Atribuições que precisam de atenção</strong>
+              <strong>Itens que precisam de atenção</strong>
               <p>
-                Reúne itens de sistemas externos ou demandas internas que estão
-                atrasados e também não recebem movimentação há alguns dias.
+                O Scope reúne aqui somente acompanhamentos relevantes ao seu contexto
+                atual e que exigem alguma ação ou acompanhamento.
               </p>
             </div>
             <span className="attention-count">
-              {attentionAssignments.length} itens
+              {attentionItems.length} itens
             </span>
           </div>
 
           <div className="attention-list">
-            {attentionAssignments.map((item) => (
+            {attentionItems.map((item) => (
               <article className="attention-card" key={item.id}>
                 <div className="attention-rail" />
 
                 <div className="attention-card-content">
                   <div className="attention-card-top">
                     <div className="attention-badges">
-                      <span
-                        className={`attention-source ${item.source.toLowerCase()}`}
-                      >
-                        {item.source}
+                      <span className="attention-source">
+                        {sourceLabel(item.source)}
                       </span>
                       <span className="attention-badge overdue">
                         <AlertTriangle size={13} />
-                        {item.overdue}
+                        Requer atenção
                       </span>
                       <span className="attention-badge stale">
                         <Clock3 size={13} />
-                        {item.stale}
+                        {String(item.metadata?.stale ?? item.updated)}
                       </span>
                     </div>
 
@@ -368,14 +295,18 @@ export function Assignments() {
                   </div>
 
                   <h3>{item.title}</h3>
-                  <p>{item.subtitle}</p>
+                  <p>
+                    {String(item.metadata?.reason ?? item.description)}
+                  </p>
 
                   <div className="attention-meta">
                     <span>
                       <Building2 size={15} />
                       <div>
                         <small>Origem / contexto</small>
-                        <strong>{item.context}</strong>
+                        <strong>
+                          {String(item.metadata?.context ?? sourceLabel(item.source))}
+                        </strong>
                       </div>
                     </span>
 
@@ -391,22 +322,31 @@ export function Assignments() {
                       <Clock3 size={15} />
                       <div>
                         <small>Prazo</small>
-                        <strong>{item.deadline}</strong>
+                        <strong>{String(item.metadata?.deadline ?? '—')}</strong>
                       </div>
                     </span>
                   </div>
                 </div>
 
-                <a
-                  className="attention-action"
-                  href={item.externalUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  <ExternalLink size={15} />
-                  Abrir origem
-                </a>
+                {item.externalUrl && (
+                  <a
+                    className="attention-action"
+                    href={item.externalUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <ExternalLink size={15} />
+                    {item.actionLabel ?? 'Abrir origem'}
+                  </a>
+                )}
               </article>
+            ))}
+
+            {attentionItems.length === 0 && (
+              <div className="interop-empty">
+                Nenhum acompanhamento precisa da sua atenção agora.
+              </div>
+            )}
             ))}
           </div>
         </section>
