@@ -5,6 +5,7 @@ import {
   ChevronRight,
   Clock3,
   DoorOpen,
+  LayoutGrid,
   MessageCircle,
   MoreHorizontal,
   Plus,
@@ -18,30 +19,32 @@ import { useMemo, useState } from 'react'
 import '../workspace-tools.css'
 
 type Panel = 'agenda' | 'chat' | null
+type AgendaMode = 'agenda' | 'rooms'
+type AgendaView = 'month' | 'week' | 'day'
 
 type CalendarEvent = {
   day: number
   title: string
   time?: string
-  scope: 'Pessoal' | 'GSERV' | 'Coordenação' | 'Institucional'
+  scope: 'Minha agenda' | 'GSERV' | 'Coordenação' | 'Instituição' | 'Projetos em andamento'
   kind: 'project' | 'task' | 'meeting' | 'institutional'
 }
 
-const agendaScopes = ['Minha agenda', 'GSERV', 'Coordenação', 'Institucional']
+const agendaScopes = ['Minha agenda', 'GSERV', 'Coordenação', 'Instituição', 'Projetos em andamento'] as const
 
 const events: CalendarEvent[] = [
   {
     day: 21,
     title: 'Revisão do PDTIC 2024–2027',
     time: '09:00',
-    scope: 'Coordenação',
+    scope: 'Projetos em andamento',
     kind: 'project',
   },
   {
     day: 21,
     title: 'Validar protótipo do GLPI',
     time: '14:00',
-    scope: 'Pessoal',
+    scope: 'Minha agenda',
     kind: 'task',
   },
   {
@@ -55,7 +58,7 @@ const events: CalendarEvent[] = [
     day: 23,
     title: 'Comitê de Governança',
     time: '10:00',
-    scope: 'Institucional',
+    scope: 'Instituição',
     kind: 'institutional',
   },
   {
@@ -69,7 +72,7 @@ const events: CalendarEvent[] = [
     day: 25,
     title: 'Modernização do Datacenter',
     time: '11:00',
-    scope: 'GSERV',
+    scope: 'Projetos em andamento',
     kind: 'project',
   },
   {
@@ -83,8 +86,74 @@ const events: CalendarEvent[] = [
     day: 30,
     title: 'Fechamento mensal',
     time: '16:30',
-    scope: 'Institucional',
+    scope: 'Instituição',
     kind: 'institutional',
+  },
+]
+
+
+type RoomBooking = {
+  id: string
+  room: string
+  day: number
+  start: string
+  end: string
+  unit: string
+  responsible: string
+  title: string
+  status: 'Em uso' | 'Reservada'
+}
+
+const rooms = [
+  { id: 'inovacao', name: 'Sala Inovação', capacity: 8, resources: 'TV · videoconferência' },
+  { id: 'estrategia', name: 'Sala Estratégia', capacity: 12, resources: 'painel interativo · videoconferência' },
+  { id: 'colaboracao', name: 'Sala Colaboração', capacity: 6, resources: 'TV · quadro branco' },
+]
+
+const roomBookings: RoomBooking[] = [
+  {
+    id: 'room-01',
+    room: 'Sala Inovação',
+    day: 21,
+    start: '09:00',
+    end: '10:30',
+    unit: 'GSERV',
+    responsible: 'Anderson Seixas',
+    title: 'Revisão do PDTIC 2024–2027',
+    status: 'Em uso',
+  },
+  {
+    id: 'room-02',
+    room: 'Sala Estratégia',
+    day: 21,
+    start: '14:00',
+    end: '15:30',
+    unit: 'CGOV',
+    responsible: 'Ana Costa',
+    title: 'Comitê de Governança',
+    status: 'Reservada',
+  },
+  {
+    id: 'room-03',
+    room: 'Sala Inovação',
+    day: 22,
+    start: '14:30',
+    end: '16:00',
+    unit: 'GSERV',
+    responsible: 'Lucas Medeiros',
+    title: 'Acompanhamento de projetos',
+    status: 'Reservada',
+  },
+  {
+    id: 'room-04',
+    room: 'Sala Colaboração',
+    day: 23,
+    start: '10:00',
+    end: '11:00',
+    unit: 'COINFRA',
+    responsible: 'Carla Mendes',
+    title: 'Planejamento de infraestrutura',
+    status: 'Reservada',
   },
 ]
 
@@ -183,9 +252,25 @@ const conversations = {
 
 export function FloatingWorkspaceTools() {
   const [panel, setPanel] = useState<Panel>(null)
-  const [agendaScope, setAgendaScope] = useState(agendaScopes[0])
+  const [agendaScope, setAgendaScope] = useState<(typeof agendaScopes)[number]>(agendaScopes[0])
+  const [agendaMode, setAgendaMode] = useState<AgendaMode>('agenda')
+  const [agendaView, setAgendaView] = useState<AgendaView>('month')
+  const [selectedRoom, setSelectedRoom] = useState(rooms[0].name)
   const [selectedMember, setSelectedMember] = useState(members[0])
   const [roomBookingOpen, setRoomBookingOpen] = useState(false)
+
+  const visibleEvents = useMemo(
+    () =>
+      agendaScope === 'Minha agenda'
+        ? events.filter((event) => event.scope === 'Minha agenda')
+        : events.filter((event) => event.scope === agendaScope),
+    [agendaScope],
+  )
+
+  const visibleRoomBookings = useMemo(
+    () => roomBookings.filter((booking) => booking.room === selectedRoom),
+    [selectedRoom],
+  )
 
   const selectedMessages = useMemo(
     () =>
@@ -238,14 +323,14 @@ export function FloatingWorkspaceTools() {
         }`}
         aria-hidden={panel !== 'agenda'}
       >
-        <header className="workspace-panel-header">
+        <header className="workspace-panel-header agenda-premium-header">
           <div>
-            <span className="workspace-panel-icon">
-              <CalendarDays size={19} />
+            <span className="workspace-panel-icon agenda-premium-icon">
+              <CalendarDays size={23} />
             </span>
             <div>
               <h2>Agenda</h2>
-              <p>Projetos, tarefas, reuniões e compromissos institucionais.</p>
+              <p>Compromissos pessoais, equipes, projetos e uso dos espaços institucionais.</p>
             </div>
           </div>
 
@@ -255,175 +340,315 @@ export function FloatingWorkspaceTools() {
             onClick={() => setPanel(null)}
             aria-label="Fechar agenda"
           >
-            <X size={19} />
+            <X size={20} />
           </button>
         </header>
 
-        <div className="agenda-scope-tabs">
-          {agendaScopes.map((scope) => (
-            <button
-              key={scope}
-              type="button"
-              className={agendaScope === scope ? 'active' : ''}
-              onClick={() => setAgendaScope(scope)}
-            >
-              {scope}
-            </button>
-          ))}
-        </div>
-
-        <div className="agenda-toolbar">
-          <div className="agenda-navigation">
-            <button type="button" className="agenda-today">
-              Hoje
-            </button>
-            <button type="button" aria-label="Mês anterior">
-              <ChevronLeft size={18} />
-            </button>
-            <button type="button" aria-label="Próximo mês">
-              <ChevronRight size={18} />
-            </button>
-            <strong>Setembro de 2026</strong>
-          </div>
-
+        <div className="agenda-mode-switch">
           <button
             type="button"
-            className="agenda-room-button"
-            onClick={() => setRoomBookingOpen((current) => !current)}
+            className={agendaMode === 'agenda' ? 'active' : ''}
+            onClick={() => setAgendaMode('agenda')}
+          >
+            <CalendarDays size={17} />
+            Agenda geral
+          </button>
+          <button
+            type="button"
+            className={agendaMode === 'rooms' ? 'active' : ''}
+            onClick={() => setAgendaMode('rooms')}
           >
             <DoorOpen size={17} />
-            Agendar sala
+            Salas de reunião
           </button>
         </div>
 
-        <div className="agenda-layout">
-          <section className="calendar-shell">
-            <div className="calendar-weekdays">
-              {['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'].map((day) => (
-                <span key={day}>{day}</span>
+        {agendaMode === 'agenda' ? (
+          <>
+            <div className="agenda-scope-tabs agenda-scope-tabs-premium">
+              {agendaScopes.map((scope) => (
+                <button
+                  key={scope}
+                  type="button"
+                  className={agendaScope === scope ? 'active' : ''}
+                  onClick={() => setAgendaScope(scope)}
+                >
+                  {scope}
+                </button>
               ))}
             </div>
 
-            <div className="calendar-grid">
-              {calendarDays.map((date, index) => {
-                const dayEvents = date.outside
-                  ? []
-                  : events.filter((event) => event.day === date.day)
+            <div className="agenda-toolbar agenda-toolbar-premium">
+              <div className="agenda-navigation">
+                <button type="button" className="agenda-today">
+                  Hoje
+                </button>
+                <button type="button" aria-label="Período anterior">
+                  <ChevronLeft size={19} />
+                </button>
+                <button type="button" aria-label="Próximo período">
+                  <ChevronRight size={19} />
+                </button>
+                <strong>Setembro de 2026</strong>
+              </div>
 
-                return (
-                  <div
-                    className={`calendar-cell ${
-                      date.outside ? 'outside' : ''
-                    } ${date.day === 21 && !date.outside ? 'today' : ''}`}
-                    key={`${date.day}-${index}`}
+              <div className="agenda-view-switch" aria-label="Visualização da agenda">
+                {(['day', 'week', 'month'] as AgendaView[]).map((view) => (
+                  <button
+                    key={view}
+                    type="button"
+                    className={agendaView === view ? 'active' : ''}
+                    onClick={() => setAgendaView(view)}
                   >
-                    <span className="calendar-day-number">{date.day}</span>
+                    {view === 'day' ? 'Dia' : view === 'week' ? 'Semana' : 'Mês'}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-                    <div className="calendar-events">
-                      {dayEvents.slice(0, 2).map((event) => (
-                        <div
-                          className={`calendar-event calendar-event-${event.kind}`}
-                          key={`${event.day}-${event.title}`}
-                          title={event.title}
-                        >
-                          {event.time && <small>{event.time}</small>}
-                          <span>{event.title}</span>
+            <div className="agenda-layout agenda-layout-premium">
+              <section className="calendar-shell">
+                <div className="calendar-weekdays">
+                  {['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'].map((day) => (
+                    <span key={day}>{day}</span>
+                  ))}
+                </div>
+
+                <div className="calendar-grid">
+                  {calendarDays.map((date, index) => {
+                    const dayEvents = date.outside
+                      ? []
+                      : visibleEvents.filter((event) => event.day === date.day)
+
+                    return (
+                      <div
+                        className={`calendar-cell ${date.outside ? 'outside' : ''} ${
+                          date.day === 21 && !date.outside ? 'today' : ''
+                        }`}
+                        key={`${date.day}-${index}`}
+                      >
+                        <span className="calendar-day-number">{date.day}</span>
+
+                        <div className="calendar-events">
+                          {dayEvents.slice(0, 3).map((event) => (
+                            <div
+                              className={`calendar-event calendar-event-${event.kind}`}
+                              key={`${event.day}-${event.title}`}
+                              title={event.title}
+                            >
+                              {event.time && <small>{event.time}</small>}
+                              <span>{event.title}</span>
+                            </div>
+                          ))}
                         </div>
-                      ))}
-                    </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </section>
+
+              <aside className="agenda-side agenda-side-premium">
+                <div className="agenda-side-card agenda-next-card">
+                  <span className="agenda-side-label">Próximos compromissos</span>
+
+                  {visibleEvents.slice(0, 4).map((event) => (
+                    <article key={`${event.day}-${event.title}`}>
+                      <div className="agenda-time-block">
+                        <strong>{event.time ?? '—'}</strong>
+                        <span>{event.day} SET</span>
+                      </div>
+                      <div>
+                        <strong>{event.title}</strong>
+                        <small>
+                          <Users size={14} />
+                          {event.scope}
+                        </small>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+
+                <button
+                  type="button"
+                  className="agenda-room-highlight"
+                  onClick={() => setAgendaMode('rooms')}
+                >
+                  <span>
+                    <DoorOpen size={20} />
+                  </span>
+                  <div>
+                    <strong>Salas de reunião</strong>
+                    <small>Veja ocupação atual, reservas e horários livres.</small>
                   </div>
-                )
-              })}
+                  <ChevronRight size={18} />
+                </button>
+              </aside>
+            </div>
+          </>
+        ) : (
+          <section className="rooms-workspace">
+            <div className="rooms-topbar">
+              <div>
+                <span className="rooms-eyebrow">Agenda de espaços</span>
+                <h3>Salas de reunião</h3>
+                <p>
+                  Ocupação por gerência ou coordenação, responsável e faixa de horário.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                className="agenda-room-button rooms-primary-action"
+                onClick={() => setRoomBookingOpen((current) => !current)}
+              >
+                <Plus size={17} />
+                Nova reserva
+              </button>
+            </div>
+
+            <div className="rooms-summary">
+              <article className="room-now-card">
+                <span className="room-status-dot" />
+                <div>
+                  <small>Em uso agora</small>
+                  <strong>Sala Inovação</strong>
+                  <p>GSERV · Anderson Seixas</p>
+                </div>
+                <time>09:00 — 10:30</time>
+              </article>
+
+              <article>
+                <small>Próxima ocupação</small>
+                <strong>Sala Estratégia</strong>
+                <p>CGOV · Ana Costa</p>
+                <time>14:00 — 15:30</time>
+              </article>
+
+              <article>
+                <small>Disponíveis agora</small>
+                <strong>1 sala</strong>
+                <p>Sala Colaboração</p>
+                <time>Livre até 10:00</time>
+              </article>
+            </div>
+
+            <div className="rooms-controls">
+              <div className="rooms-list">
+                {rooms.map((room) => (
+                  <button
+                    type="button"
+                    key={room.id}
+                    className={selectedRoom === room.name ? 'active' : ''}
+                    onClick={() => setSelectedRoom(room.name)}
+                  >
+                    <DoorOpen size={17} />
+                    <span>
+                      <strong>{room.name}</strong>
+                      <small>{room.capacity} pessoas · {room.resources}</small>
+                    </span>
+                  </button>
+                ))}
+              </div>
+
+              <div className="agenda-view-switch">
+                {(['day', 'week', 'month'] as AgendaView[]).map((view) => (
+                  <button
+                    key={view}
+                    type="button"
+                    className={agendaView === view ? 'active' : ''}
+                    onClick={() => setAgendaView(view)}
+                  >
+                    {view === 'day' ? 'Dia' : view === 'week' ? 'Semana' : 'Mês'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="room-schedule-shell">
+              <div className="room-schedule-head">
+                <div>
+                  <strong>{selectedRoom}</strong>
+                  <span>Semana de 21 a 27 de setembro</span>
+                </div>
+                <div className="room-availability-legend">
+                  <span><i className="busy" /> Ocupada</span>
+                  <span><i className="free" /> Disponível</span>
+                </div>
+              </div>
+
+              <div className="room-week-grid">
+                {[21, 22, 23, 24, 25].map((day) => {
+                  const bookings = visibleRoomBookings.filter((booking) => booking.day === day)
+                  return (
+                    <div className="room-day-column" key={day}>
+                      <header>
+                        <span>{['SEG', 'TER', 'QUA', 'QUI', 'SEX'][day - 21]}</span>
+                        <strong>{day}</strong>
+                      </header>
+
+                      <div className="room-day-body">
+                        {bookings.map((booking) => (
+                          <article className="room-booking-block" key={booking.id}>
+                            <small>{booking.start} — {booking.end}</small>
+                            <strong>{booking.unit}</strong>
+                            <span>{booking.title}</span>
+                            <em>{booking.responsible}</em>
+                            <b>{booking.status}</b>
+                          </article>
+                        ))}
+
+                        <div className="room-free-slot">
+                          <Clock3 size={14} />
+                          <span>Horários livres disponíveis</span>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+
+            <div className="rooms-bookings-list">
+              <div className="rooms-bookings-title">
+                <div>
+                  <span className="rooms-eyebrow">Reservas da semana</span>
+                  <h4>Quem vai ocupar a sala</h4>
+                </div>
+                <LayoutGrid size={20} />
+              </div>
+
+              {visibleRoomBookings.map((booking) => (
+                <article key={booking.id}>
+                  <div className="room-booking-date">
+                    <strong>{booking.day}</strong>
+                    <span>SET</span>
+                  </div>
+                  <div>
+                    <strong>{booking.title}</strong>
+                    <small>{booking.unit} · responsável: {booking.responsible}</small>
+                  </div>
+                  <time>{booking.start} — {booking.end}</time>
+                  <span className={booking.status === 'Em uso' ? 'room-state live' : 'room-state'}>
+                    {booking.status}
+                  </span>
+                </article>
+              ))}
             </div>
           </section>
-
-          <aside className="agenda-side">
-            <div className="agenda-side-card agenda-next-card">
-              <span className="agenda-side-label">Próximos compromissos</span>
-
-              <article>
-                <div className="agenda-time-block">
-                  <strong>09:00</strong>
-                  <span>21 SET</span>
-                </div>
-                <div>
-                  <strong>Revisão do PDTIC 2024–2027</strong>
-                  <small>
-                    <Users size={13} />
-                    Coordenação · 7 participantes
-                  </small>
-                </div>
-              </article>
-
-              <article>
-                <div className="agenda-time-block">
-                  <strong>14:00</strong>
-                  <span>21 SET</span>
-                </div>
-                <div>
-                  <strong>Validar protótipo do GLPI</strong>
-                  <small>
-                    <Clock3 size={13} />
-                    Tarefa vinculada
-                  </small>
-                </div>
-              </article>
-
-              <article>
-                <div className="agenda-time-block">
-                  <strong>10:00</strong>
-                  <span>23 SET</span>
-                </div>
-                <div>
-                  <strong>Comitê de Governança</strong>
-                  <small>
-                    <Building2 size={13} />
-                    Agenda institucional
-                  </small>
-                </div>
-              </article>
-            </div>
-
-            <div className="agenda-side-card">
-              <div className="agenda-side-title">
-                <div>
-                  <span className="agenda-side-label">Salas de reunião</span>
-                  <strong>Disponibilidade hoje</strong>
-                </div>
-                <DoorOpen size={19} />
-              </div>
-
-              <div className="meeting-room">
-                <div>
-                  <strong>Sala Inovação</strong>
-                  <span>8 pessoas · TV · videoconferência</span>
-                </div>
-                <small>14:30 — 16:00</small>
-              </div>
-
-              <div className="meeting-room">
-                <div>
-                  <strong>Sala Estratégia</strong>
-                  <span>12 pessoas · painel interativo</span>
-                </div>
-                <small>16:00 — 18:00</small>
-              </div>
-            </div>
-          </aside>
-        </div>
+        )}
 
         {roomBookingOpen && (
-          <div className="room-booking-mock">
+          <div className="room-booking-mock room-booking-premium">
             <header>
               <div>
-                <DoorOpen size={18} />
+                <DoorOpen size={20} />
                 <div>
-                  <strong>Agendar sala de reunião</strong>
-                  <span>Reserva simulada vinculada à agenda.</span>
+                  <strong>Reservar sala de reunião</strong>
+                  <span>Vincule a reserva à unidade, responsável e compromisso.</span>
                 </div>
               </div>
               <button type="button" onClick={() => setRoomBookingOpen(false)}>
-                <X size={17} />
+                <X size={18} />
               </button>
             </header>
 
@@ -435,8 +660,22 @@ export function FloatingWorkspaceTools() {
               <label>
                 <span>Sala</span>
                 <div className="mock-select">
-                  Sala Inovação
+                  {selectedRoom}
                   <ChevronRight size={16} />
+                </div>
+              </label>
+              <label>
+                <span>Unidade responsável</span>
+                <div className="mock-select">
+                  GSERV
+                  <Building2 size={16} />
+                </div>
+              </label>
+              <label>
+                <span>Responsável</span>
+                <div className="mock-select">
+                  Anderson Seixas
+                  <Users size={16} />
                 </div>
               </label>
               <label>
@@ -446,23 +685,16 @@ export function FloatingWorkspaceTools() {
                   <Clock3 size={16} />
                 </div>
               </label>
-              <label>
-                <span>Participantes</span>
-                <div className="mock-select">
-                  GSERV · 6 pessoas
-                  <Users size={16} />
-                </div>
-              </label>
             </div>
 
             <footer>
               <span>
-                <Video size={15} />
-                Sala com videoconferência disponível
+                <Video size={16} />
+                Recursos da sala exibidos antes da confirmação
               </span>
               <button type="button" className="primary small">
                 <Plus size={15} />
-                Adicionar à agenda
+                Confirmar reserva
               </button>
             </footer>
           </div>
