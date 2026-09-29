@@ -159,7 +159,7 @@ const seiProcesses: SeiProcess[] = [
 
 export function Assignments() {
   const [active, setActive] = useState(baseTabs[0])
-  const [selectedUnit, setSelectedUnit] = useState('SETIC-GSERV')
+  const [selectedUnit, setSelectedUnit] = useState(currentUser.unit)
   const [catalogOpen, setCatalogOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [workItems, setWorkItems] = useState<WorkItem[]>([])
@@ -175,13 +175,25 @@ export function Assignments() {
   }, [])
 
   const visibleTabs = useMemo(() => {
-    const result = [...baseTabs]
-    const hasAttendances =
+    const result = ['Últimas Movimentações', 'Atenção']
+
+    if (workItems.some((item) => item.kind === 'atribuicao')) {
+      result.push('Atribuições')
+    }
+
+    if (workItems.some((item) => item.kind === 'solicitacao')) {
+      result.push('Solicitações')
+    }
+
+    if (
       hasRole('alpha_attendant') &&
       workItems.some((item) => item.kind === 'atendimento')
+    ) {
+      result.push('Atendimentos')
+    }
 
-    if (hasAttendances) {
-      result.splice(4, 0, 'Atendimentos')
+    if (currentUser.enabledSources.includes('SEI')) {
+      result.push('Processos SEI')
     }
 
     return result
@@ -373,7 +385,9 @@ export function Assignments() {
             </div>
 
             <div className="sei-unit-list" role="list" aria-label="Unidades SEI">
-              {seiUnits.map((unit) => (
+              {seiUnits
+                .filter((unit) => currentUser.seiUnits.includes(unit.id))
+                .map((unit) => (
                 <button
                   type="button"
                   key={unit.id}
