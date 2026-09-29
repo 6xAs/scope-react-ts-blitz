@@ -147,7 +147,7 @@ export function Home() {
                 </Link>
               )
             ))}
-          </div>/div>
+          </div>
         </section>
 
         <section className="panel compact-panel">
