@@ -492,3 +492,148 @@
     font-size: 13px;
   }
 }
+
+
+/* Checkpoint 05: unified feed + global search */
+.movement-row-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.movement-row-link:hover {
+  background: #faf9ff;
+}
+
+.global-search-shell {
+  position: relative;
+  width: 430px;
+  max-width: min(430px, 42vw);
+}
+
+.global-search-input {
+  width: 100%;
+  background: #fff;
+}
+
+.global-search-results {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  z-index: 95;
+  width: min(620px, 72vw);
+  overflow: hidden;
+  border: 1px solid #e2e6ef;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 22px 60px rgba(31, 45, 91, .16);
+}
+
+.global-search-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px 14px;
+  border-bottom: 1px solid #edf0f5;
+  background: #fafbfc;
+}
+
+.global-search-head span {
+  color: #495572;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.global-search-head small {
+  color: #98a1b4;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.global-search-result {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px;
+  padding: 13px 14px;
+  border: 0;
+  border-bottom: 1px solid #f0f2f6;
+  background: #fff;
+  color: #263252;
+  text-align: left;
+  cursor: pointer;
+}
+
+.global-search-result:last-of-type {
+  border-bottom: 0;
+}
+
+.global-search-result:hover {
+  background: #f8f6ff;
+}
+
+.global-search-result > div {
+  min-width: 0;
+}
+
+.global-search-result strong,
+.global-search-result small {
+  display: block;
+}
+
+.global-search-result strong {
+  overflow: hidden;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.global-search-result > div small {
+  margin-top: 3px;
+  overflow: hidden;
+  color: #8590a8;
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.global-search-result > span {
+  min-width: 86px;
+  text-align: right;
+}
+
+.global-search-result > span b {
+  display: block;
+  color: #6336f4;
+  font-size: 9px;
+  text-transform: uppercase;
+}
+
+.global-search-result > span small {
+  margin-top: 2px;
+  color: #9aa3b6;
+  font-size: 9px;
+}
+
+.global-search-empty {
+  padding: 24px 16px;
+  color: #8f98ad;
+  font-size: 11px;
+  text-align: center;
+}
+
+@media (max-width: 760px) {
+  .global-search-shell {
+    width: 100%;
+    max-width: none;
+  }
+
+  .global-search-results {
+    width: min(94vw, 620px);
+  }
+
+  .global-search-result {
+    grid-template-columns: minmax(0, 1fr) 74px;
+  }
+}
