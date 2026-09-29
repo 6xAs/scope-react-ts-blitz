@@ -3,25 +3,35 @@ import { AlertCircle, ArrowRight, CheckSquare2, FileText, FolderKanban, LifeBuoy
 import { Link } from 'react-router-dom'
 import { StatusPill } from '../components/StatusPill'
 import { projects, tasks } from '../data/mock'
-import { getUnifiedWorkItems, sourceLabel } from '../integrations'
+import { getUnifiedWorkItems } from '../integrations'
 import type { WorkItem } from '../integrations/types'
+import { getUnifiedActivityFeed } from '../activity/unifiedFeed'
+import type { UnifiedActivity } from '../activity/unifiedFeed'
 import '../interoperability.css'
 
 const heroFallback =
   'linear-gradient(90deg, rgba(18, 73, 176, 0.92), rgba(26, 126, 255, 0.48))'
 
-function SourceIcon({ item }: { item: WorkItem }) {
-  if (item.source === 'SEI') return <FileText size={18} />
-  if (item.source === 'GLPI') return <LifeBuoy size={18} />
+function ActivityIcon({ item }: { item: UnifiedActivity }) {
+  if (item.kind === 'project') return <FolderKanban size={18} />
+  if (item.kind === 'task') return <CheckSquare2 size={18} />
+  if (item.sourceLabel === 'SEI') return <FileText size={18} />
+  if (item.sourceLabel === 'GLPI') return <LifeBuoy size={18} />
   return <Link2 size={18} />
 }
 
 export function Home() {
   const [heroBackground, setHeroBackground] = useState(heroFallback)
   const [externalItems, setExternalItems] = useState<WorkItem[]>([])
+  const [activityFeed, setActivityFeed] = useState<UnifiedActivity[]>([])
 
   useEffect(() => {
-    getUnifiedWorkItems().then(setExternalItems)
+    Promise.all([getUnifiedWorkItems(), getUnifiedActivityFeed()]).then(
+      ([items, feed]) => {
+        setExternalItems(items)
+        setActivityFeed(feed)
+      },
+    )
   }, [])
 
   useEffect(() => {
@@ -47,7 +57,6 @@ export function Home() {
   }, [])
 
   const attentionCount = externalItems.filter((item) => item.attention).length
-  const recentExternal = externalItems.slice(0, 2)
 
   return (
     <div>
@@ -93,56 +102,52 @@ export function Home() {
           </div>
 
           <div className="movement-list">
-            {projects.slice(0, 1).map((project, index) => (
-              <div className="movement-row" key={project.id}>
-                <div className="movement-icon">
-                  <FolderKanban size={18} />
-                </div>
+            {activityFeed.map((item) => (
+              item.external ? (
+                <a
+                  className="movement-row movement-row-link"
+                  key={item.id}
+                  href={item.href}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <div className="movement-icon">
+                    <ActivityIcon item={item} />
+                  </div>
 
-                <div>
-                  <strong>{project.title}</strong>
-                  <small>
-                    Status alterado para {project.status.toLowerCase()}
-                  </small>
-                </div>
+                  <div>
+                    <strong>{item.title}</strong>
+                    <small>
+                      {item.description} · {item.sourceLabel}
+                    </small>
+                  </div>
 
-                <StatusPill>{project.status}</StatusPill>
-                <time>{index ? 'há 4 horas' : 'há 2 horas'}</time>
-              </div>
+                  <StatusPill>{item.status}</StatusPill>
+                  <time>{item.timeLabel}</time>
+                </a>
+              ) : (
+                <Link
+                  className="movement-row movement-row-link"
+                  key={item.id}
+                  to={item.href ?? '/'}
+                >
+                  <div className="movement-icon">
+                    <ActivityIcon item={item} />
+                  </div>
+
+                  <div>
+                    <strong>{item.title}</strong>
+                    <small>
+                      {item.description} · {item.sourceLabel}
+                    </small>
+                  </div>
+
+                  <StatusPill>{item.status}</StatusPill>
+                  <time>{item.timeLabel}</time>
+                </Link>
+              )
             ))}
-
-            <div className="movement-row">
-              <div className="movement-icon">
-                <CheckSquare2 size={18} />
-              </div>
-
-              <div>
-                <strong>{tasks[0].title}</strong>
-                <small>Nova atualização registrada na tarefa.</small>
-              </div>
-
-              <StatusPill>{tasks[0].status}</StatusPill>
-              <time>há 1 dia</time>
-            </div>
-
-            {recentExternal.map((item) => (
-              <div className="movement-row" key={item.id}>
-                <div className="movement-icon">
-                  <SourceIcon item={item} />
-                </div>
-
-                <div>
-                  <strong>{item.title}</strong>
-                  <small>
-                    {item.description} · {sourceLabel(item.source)}
-                  </small>
-                </div>
-
-                <StatusPill>{item.status}</StatusPill>
-                <time>{item.updated}</time>
-              </div>
-            ))}
-          </div>
+          </div>/div>
         </section>
 
         <section className="panel compact-panel">
