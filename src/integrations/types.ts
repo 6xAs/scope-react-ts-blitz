@@ -36,21 +36,27 @@ export type WorkItem = {
   metadata?: Record<string, string | number | boolean | null>
 }
 
+export type ServiceCategory =
+  | 'RH'
+  | 'Acessos'
+  | 'Tecnologia'
+  | 'Documentos'
+  | 'Licenças'
+  | 'Atendimento'
+  | 'Outros'
+
 export type ServiceCatalogItem = {
   id: string
   source: IntegrationSource
   title: string
   description: string
-  category:
-    | 'RH'
-    | 'Acessos'
-    | 'Tecnologia'
-    | 'Documentos'
-    | 'Licenças'
-    | 'Atendimento'
-    | 'Outros'
+  category: ServiceCategory
   externalUrl: string
   capabilities: IntegrationLevel[]
+  keywords?: string[]
+  featured?: boolean
+  actionLabel?: string
+  availabilityLabel?: string
 }
 
 export interface IntegrationAdapter {
