@@ -347,7 +347,6 @@ export function Assignments() {
                 Nenhum acompanhamento precisa da sua atenção agora.
               </div>
             )}
-            ))}
           </div>
         </section>
       ) : active === 'Processos SEI' ? (
