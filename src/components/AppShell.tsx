@@ -7,6 +7,7 @@ import {
   Link2,
   Search,
   Settings,
+  UsersRound,
 } from 'lucide-react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { FloatingWorkspaceTools } from './FloatingWorkspaceTools'
@@ -16,6 +17,7 @@ const nav = [
   { to: '/atribuicoes', label: 'Acompanhamentos', icon: Link2 },
   { to: '/tarefas', label: 'Tarefas', icon: CheckSquare2 },
   { to: '/projetos', label: 'Projetos', icon: FolderKanban },
+  { to: '/quadro-servidores', label: 'Quadro Servidores', icon: UsersRound },
   { to: '/relatorios', label: 'Relatórios', icon: BarChart3 },
 ]
 

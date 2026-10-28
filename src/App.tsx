@@ -4,6 +4,7 @@ import { Assignments } from './pages/Assignments'
 import { Home } from './pages/Home'
 import { Kanban } from './pages/Kanban'
 import { Projects } from './pages/Projects'
+import { StaffBoard } from './pages/StaffBoard'
 import { Tasks } from './pages/Tasks'
 
 export default function App() {
@@ -16,6 +17,7 @@ export default function App() {
         <Route path="/atribuicoes" element={<Assignments />} />
         <Route path="/tarefas" element={<Tasks />} />
         <Route path="/projetos" element={<Projects />} />
+        <Route path="/quadro-servidores" element={<StaffBoard />} />
         <Route
           path="/relatorios"
           element={
