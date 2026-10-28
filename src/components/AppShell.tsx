@@ -55,10 +55,15 @@ export function AppShell() {
 
         <div className="side-divider" />
 
-        <a className="side-link" href="#">
+        <NavLink
+          to="/administracao"
+          className={({ isActive }) =>
+            isActive ? 'side-link active' : 'side-link'
+          }
+        >
           <Settings size={20} />
           <span>Administração</span>
-        </a>
+        </NavLink>
 
         <div className="sidebar-note">
           <div className="mini-art">▰</div>
